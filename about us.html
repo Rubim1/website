@@ -1,0 +1,207 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nezur.io Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .title {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .fade {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .fade-in {
+            opacity: 1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between">
+                <div class="flex space-x-4">
+                    <!-- Logo -->
+                    <div>
+                        <a href="#" class="flex items-center py-5 px-2 text-gray-700">
+                            <span class="font-bold text-xl text-black">7 AMAZING</span>
+                        </a>
+                    </div>
+                    <!-- Primary Nav -->
+                    <div class="hidden md:flex items-center space-x-1">
+                    </div>
+                </div>
+                <!-- Secondary Nav -->
+                <div class="hidden md:flex items-center space-x-1">
+                </div>
+                <!-- Mobile Button -->
+                <div class="md:hidden flex items-center">
+                    <button class="mobile-menu-button">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+<!-- Hero Section -->
+<section class="bg-cover bg-center h-screen" style="background-image: url('https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/1327931.jpeg');">
+    <div class="flex items-center justify-center h-full bg-gray-900 bg-opacity-50">
+        <div class="text-center text-white">
+            <h1 class="title text-5xl md:text-7xl font-bold mb-4" style="animation: fadeIn 2s ease-in-out;">Welcome to <span style="color: #e4ecdd;">7 AMAZING</span></h1>
+            <p id="dynamic-text" class="text-lg md:text-2xl mb-8 fade" style="animation: fadeIn 2s ease-in-out;">ABOUT OUR CLASS</p>
+            <div style="background-color: #e0f0e0; border: 1px solid black; padding: 10px; text-align: center; border-radius: 10px; width: 200px; margin: 0 auto; animation: fadeIn 2s ease-in-out;">
+                <a href="https://sites.google.com/guru.smp.belajar.id/webkelas7a" style="text-decoration: none;">
+                    <b style="color: black;">BACK TO MENU</b>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+  <!-- Animasi -->
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  
+    .fadeIn {
+      animation: fadeIn 2s ease-in-out;
+    }
+  </style>
+
+    <!-- Album Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="title text-4xl font-bold">Album</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-15%20at%2009.17.34_28ec6a64.jpg" alt="Image 1" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-14%20at%2010.24.07_ebc28f9a.jpg" alt="Image 2" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-14%20at%2010.24.06_f506b7c3.jpg" alt="Image 3" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-14%20at%2010.24.08_06da769d.jpg" alt="Image 4" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-14%20at%2010.24.07_2c86591b.jpg" alt="Image 5" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+                    <img src="https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/WhatsApp%20Image%202024-09-14%20at%2010.24.07_f9b8cb76.jpg" alt="Image 6" class="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer" onclick="openModal(this.src)">
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <h2 class="title text-4xl font-bold">Kelas Kami: Tempat Inspirasi dan Pembelajaran</h2>
+                <p class="mt-4">Kelas kami adalah tempat di mana semangat belajar berkumpul. Di sini, kami bukan hanya siswa dan guru, tetapi juga teman sekaligus rekan perjalanan. Mari jelajahi beberapa aspek kelas kami:</p>
+                <p class="mt-4"><strong>Atmosfer Ramah:</strong></p>
+                <p class="mt-2">Di dalam kelas, terselip tawa, diskusi seru, dan semangat untuk saling membantu.</p>
+                <p class="mt-2">Setiap sudut ruangan dipenuhi dengan semangat belajar dan kreativitas.</p>
+                <p class="mt-4"><strong>Guru yang Menginspirasi:</strong></p>
+                <p class="mt-2">Guru-guru kami bukan hanya mengajar, tetapi juga membimbing kami untuk menemukan potensi terbaik dalam diri.</p>
+                <p class="mt-2">Mereka adalah pilar pengetahuan dan kebijaksanaan.</p>
+                <p class="mt-4"><strong>Teman Seperjuangan:</strong></p>
+                <p class="mt-2">Bersama teman-teman sekelas, kami menghadapi tantangan dan merayakan keberhasilan bersama.</p>
+                <p class="mt-2">Setiap cerita dan pengalaman kami menjadi bagian dari perjalanan ini.</p>
+                <p class="mt-4"><strong>Ruang Kreativitas:</strong></p>
+                <p class="mt-2">Di kelas kami, kami mengejar ilmu, seni, dan mimpi.</p>
+                <p class="mt-2">Dari tulisan hingga proyek seni, semuanya diberdayakan di sini.</p>
+                <p class="mt-4">Kelas kami bukan hanya ruang fisik, tetapi juga tempat di mana kami tumbuh, belajar, dan mencipta. Mari bersama-sama menjadikan kelas ini lebih indah dan bermakna! 📚✨</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-white">
+            <p>&copy; 2024 7 AMAZING.</p>
+        </div>
+    </footer>
+
+    <script>
+        const btn = document.querySelector('button.mobile-menu-button');
+        const menu = document.querySelector('.mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        const dynamicText = document.getElementById('dynamic-text');
+        const texts = ["ANDA BERADA DI HALAMAN", "ABOUT OUR CLASS"];
+        let index = 0;
+
+        setInterval(() => {
+            dynamicText.classList.remove('fade-in');
+            setTimeout(() => {
+                dynamicText.textContent = texts[index];
+                dynamicText.classList.add('fade-in');
+                index = (index + 1) % texts.length;
+            }, 1000); // Match the transition duration
+        }, 5000);
+
+        function openModal(src) {
+            document.getElementById("myModal").style.display = "block";
+            document.getElementById("img01").src = src;
+        }
+
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
