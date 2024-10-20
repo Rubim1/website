@@ -1,0 +1,162 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>7 Amazing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: url('https://raw.githubusercontent.com/Rubim1/images/e3829a959b80903b5603555aacb52008783e2fa0/Nature-Wallpaper-HD-Free-download.jpg') no-repeat center center fixed;
+    background-size: cover;
+
+      background-size: cover;
+      color: #fff;
+    }
+    .title {
+      font-family: 'Anton', sans-serif;
+    }
+    .text-custom {
+      color: #e4ecdd; /* Custom color */
+    }
+    #dynamic-text {
+      font-family: 'Anton', sans-serif;
+      font-weight: bold;
+      color: #000; /* Changed color to black for better visibility */
+      transition: color 0.5s ease, opacity 0.5s ease;
+    }
+    .btn {
+      background-color: #e4ecdd;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #c8d4c3;
+      transform: translateY(-3px);
+    }
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+    .slide-up {
+      transform: translateY(20px);
+      opacity: 0;
+      animation: slideUp 1.5s ease-in-out forwards;
+    }
+    @keyframes slideUp {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .bounce-in {
+      animation: bounceIn 1.5s ease-in-out forwards;
+    }
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    .text-outline {
+      position: relative;
+      display: inline-block;
+      color: #fff;
+      font-weight: 900;
+      font-size: 5rem;
+      font-family: 'Anton', sans-serif;
+    }
+    .text-outline::before {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      color: black;
+      -webkit-text-stroke: 2px black;
+    }
+    .text-outline.text-custom {
+      color: #e4ecdd;
+    }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const dynamicText = document.getElementById("dynamic-text");
+      dynamicText.innerText = "Loading";
+      setTimeout(function() {
+        dynamicText.style.opacity = 0;
+        setTimeout(function() {
+          dynamicText.innerText = "We Are";
+          dynamicText.style.opacity = 1;
+          setInterval(function() {
+            dynamicText.style.opacity = 0;
+            setTimeout(function() {
+              if (dynamicText.innerText === "We Are") {
+                dynamicText.innerText = "The Amazing Class";
+              } else {
+                dynamicText.innerText = "We Are";
+              }
+              dynamicText.style.opacity = 1;
+            }, 500);
+          }, 3000);
+        }, 500);
+      }, 3000);
+    });
+  </script>
+</head>
+<body class="relative min-h-screen flex items-center justify-center">
+  <div class="absolute top-4 left-4 text-white text-sm fade-in">
+    7 AMAZING CLASS
+  </div>
+  <div class="absolute top-4 right-4 flex space-x-4 text-white text-sm fade-in">
+    <i class="fab fa-discord"></i>
+    <i class="fab fa-youtube"></i>
+    <i class="fab fa-tiktok"></i>
+    <a href="https://www.instagram.com/seven__.amazing/?igsh=OHJwd3ZnMGs0dDcx">
+      <i class="fab fa-instagram"></i>
+    </a>
+    <i class="fab fa-twitter"></i>
+  </div>
+  <div class="text-center slide-up">
+    <p class="text-gray-400">Introducing</p>
+    <h1 class="text-5xl font-extrabold bounce-in">
+      <span class="text-outline" data-text="7">7</span> 
+      <span class="text-outline text-custom" data-text="AMAZING">AMAZING</span>
+    </h1>
+    <p class="text-custom" id="dynamic-text" style="opacity: 1; color: #000;">The Amazing Class</p>
+    <div class="grid grid-cols-2 gap-6 mt-4">
+      <a class="btn inline-block bounce-in" href="https://sites.google.com/guru.smp.belajar.id/webkelas7a/menu/about-our-class">About Our Class</a>
+      <a class="btn inline-block bounce-in" href="https://docs.google.com/spreadsheets/d/1DOFuQjICT47k1L5rqpxp3ety3M7JjkD5ncvNKM5T9JI/edit?gid=1424646149#gid=1424646149">E-Presensi Kelas</a>
+      <a class="btn inline-block bounce-in" href="https://sites.google.com/guru.smp.belajar.id/webkelas7a/menu/jadwal-piket">Jadwal Piket</a>
+      <a class="btn inline-block bounce-in" href="https://sites.google.com/guru.smp.belajar.id/webkelas7a/menu/champions">The Champions</a>
+      <a class="btn inline-block bounce-in" href="https://docs.google.com/spreadsheets/d/1Anuhn4Xv2syaUC1X8_0G9zeZ9N3Sg7wTrXaxwQS72TM/edit?gid=2005592952#gid=2005592952">E-Jurnal Kelas 7A</a>
+      <a class="btn inline-block bounce-in" href="https://drive.google.com/drive/folders/1XZLEYd9cy4NaqGzrAThdZCb3ImEukDao">Likabum</a>
+    </div>
+    <div style="position: relative; width: 100%; height: 0; padding-top: 70%; padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden; border-radius: 8px; will-change: transform;">
+      <iframe loading="lazy" src="https://www.canva.com/design/DAGQu7MbYKA/rPuRJr6SvczSdBsvEqNsUQ/view?embed" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0; margin: 0;"></iframe>
+    </div>
+    <a href="https://www.canva.com/design/DAGQu7MbYKA/rPuRJr6SvczSdBsvEqNsUQ/view?utm_content=DAGQu7MbYKA&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" rel="noopener"></a>
+  </div>
+</body>
+</html>
