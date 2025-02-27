@@ -546,8 +546,8 @@ function App() {
                 description: "Learning together in our classroom"
               },
               {
-                video: "video/kontol.mp4",
-                title: "Togetherness",
+                video: "https://www.youtube.com/embed/zt-xhMDNKhY?autoplay=1&controls=0&mute=1&loop=1&playlist=zt-xhMDNKhY",
+                title: "Togetherness", 
                 description: "A description of the togetherness/solidarity/camaraderie between students and their homeroom teacher.",
                 autoPlay: true
               },
@@ -562,18 +562,27 @@ function App() {
                 className="group relative overflow-hidden rounded-xl aspect-square transform transition-all duration-700 animate-rotate-in"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                {item.image ? (
+                {item.video ? (
+                  <div className="relative w-full h-full">
+                    <div className="absolute inset-0 z-10" />
+                    <iframe 
+                      src={item.video}
+                      className="w-full h-full object-cover pointer-events-none"
+                      title={item.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ 
+                        width: '2000%',    // 20x lebih besar
+                        height: '2000%',   // 20x lebih besar
+                        transform: 'scale(0.05)', // Scale 1/20
+                        transformOrigin: '0 0'
+                      }}
+                    />
+                  </div>
+                ) : (
                   <img 
                     src={item.image} 
                     alt={item.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <video 
-                    src={item.video} 
-                    autoPlay={item.autoPlay} 
-                    loop 
-                    muted 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 )}
