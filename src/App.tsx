@@ -210,14 +210,13 @@ function App() {
       )}
 
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 glass transition-all duration-500 ${scrollY > 50 ? 'py-2 shadow-lg' : 'py-4'}`}>
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="text-xl font-bold tracking-wider">
-            <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-600 animate-pulse-slow">7</span>
-            <span className="relative">
-              AMAZING
-              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-emerald-400 to-transparent transform scale-x-0 origin-left transition-transform group-hover:scale-x-100"></span>
+      <header className={`fixed top-0 left-0 right-0 z-50 glass transition-all duration-500 ${scrollY > 50 ? 'py-2' : 'py-3 md:py-4'}`}>
+        <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
+          <div className="text-lg md:text-xl font-bold tracking-wider">
+            <span className="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-600 animate-pulse-slow">
+              7
             </span>
+            <span className="relative">AMAZING</span>
           </div>
 
           <nav className="hidden md:flex space-x-8">
@@ -539,7 +538,7 @@ function App() {
             <p className="text-slate-400 max-w-2xl mx-auto">Capturing moments and memories from our amazing class journey.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 px-4 md:px-0">
             {[
               {
                 image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
