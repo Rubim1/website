@@ -452,7 +452,7 @@ function App() {
               >
                 <div className="card-3d-content">
                   <video
-                    src="[16_9] DJ Tie Me Down X Kawenimerry X Ena Ena Rawi Djaffar 🎼🎵 [31D588F].mp4"
+                    src="video\[16_9] DJ Tie Me Down X Kawenimerry X Ena Ena Rawi Djaffar 🎼🎵 [31D588F].mp4"
                     className="w-full aspect-video rounded-lg shadow-lg"
                     title="Class Students"
                     loading="lazy"
@@ -546,9 +546,9 @@ function App() {
                 description: "Learning together in our classroom"
               },
               {
-                video: "kontol.mp4",
+                video: "video/kontol.mp4",
                 title: "Togetherness",
-                description: " A description of the togetherness/solidarity/camaraderie between students and their homeroom teacher.",
+                description: "A description of the togetherness/solidarity/camaraderie between students and their homeroom teacher.",
                 autoPlay: true
               },
               {
