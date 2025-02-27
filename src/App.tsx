@@ -452,7 +452,7 @@ function App() {
               >
                 <div className="card-3d-content">
                   <video
-                    src="[16_9] DJ Tie Me Down X Kawenimerry X Ena Ena Rawi Djaffar 🎼🎵 [31D588F].mp4"
+                    src="1.mp4"
                     className="w-full aspect-video rounded-lg shadow-lg"
                     title="Class Students"
                     loading="lazy"
