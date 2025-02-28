@@ -133,6 +133,14 @@ function App() {
   const handleNavClick = (section) => {
     setActiveSection(section);
     setIsMenuOpen(false);
+    
+    const element = document.getElementById(section);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   };
 
   const handleTooltip = (content, e) => {
@@ -168,7 +176,27 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white transition-all duration-500 overflow-x-hidden">
+      <style>
+        {`
+          html {
+            scroll-behavior: smooth;
+          }
+          
+          .section-animate {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+          }
+          
+          .transform-gpu {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform;
+          }
+        `}
+      </style>
+
       {/* Particle Background */}
       <div className="particles fixed inset-0 pointer-events-none z-0">
         {particles.map(particle => (
@@ -399,8 +427,12 @@ function App() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section ref={aboutRef} id="about" className="py-20 bg-slate-900 relative">
+      {/* About Section with improved animations */}
+      <section 
+        ref={aboutRef} 
+        id="about" 
+        className="py-20 bg-slate-900 relative section-animate transform-gpu"
+      >
         <div className="absolute inset-0 opacity-10">
           <img
             src="https://images.unsplash.com/photo-1522661067900-ab829854a57f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
@@ -415,10 +447,13 @@ function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="transform transition-all duration-700" style={{
-              transform: `translateY(${Math.min(0, (scrollY - 800) / 5)}px)`,
-              opacity: Math.min(1, Math.max(0, (scrollY - 600) / 300))
-            }}>
+            <div 
+              className="section-animate transform-gpu"
+              style={{
+                transform: `translate3d(0, ${Math.min(0, (scrollY - 800) / 5)}px, 0)`,
+                opacity: Math.min(1, Math.max(0, (scrollY - 600) / 300))
+              }}
+            >
               <h3 className="text-2xl font-bold mb-4">Our <span className="text-emerald-400">Mission</span></h3>
               <p className="text-slate-400 mb-6">
                 To create a supportive learning environment where every student can thrive academically and personally.
@@ -452,15 +487,21 @@ function App() {
               >
                 <div className="card-3d-content">
                   <video
-                    src="video\[16_9] DJ Tie Me Down X Kawenimerry X Ena Ena Rawi Djaffar 🎼🎵 [31D588F].mp4"
+                    src="https://rubim1.github.io/video/%5B16_9%5D%20DJ%20Tie%20Me%20Down%20X%20Kawenimerry%20X%20Ena%20Ena%20Rawi%20Djaffar%20%F0%9F%8E%BC%F0%9F%8E%B5%20%5B31D588F%5D.mp4"
                     className="w-full aspect-video rounded-lg shadow-lg"
                     title="Class Students"
                     loading="lazy"
-                    autoPlay={true}
-                    loop={true}
-                    muted={true} // Add this to prevent auto-playing video from playing sound
-                    playsInline={true} // Add this to make the video play inline on mobile devices
-                  ></video>
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
                 <div className="mt-6">
                   <h4 className="text-xl font-bold mb-2 flex items-center">
                     <Rocket size={20} className="text-emerald-400 mr-2" />
@@ -477,23 +518,29 @@ function App() {
     </div>
       </section >
 
-    {/* Schedule Section */ }
-    < section ref = { scheduleRef } id = "schedule" className = "py-20 bg-gradient-to-b from-slate-900 to-slate-800 relative" >
-        <div className="absolute inset-0 opacity-5">
-          <img 
-            src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2068&q=80" 
-            alt="Background Pattern" 
-            className="w-full h-full object-cover"
-          />
+    {/* Schedule Section with improved animations */ }
+    < section 
+      ref={scheduleRef} 
+      id="schedule" 
+      className="py-20 bg-gradient-to-b from-slate-900 to-slate-800 relative section-animate transform-gpu"
+    >
+      <div className="absolute inset-0 opacity-5">
+        <img 
+          src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2068&q=80" 
+          alt="Background Pattern" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold mb-4">Class <span className="text-emerald-400 text-glow">Schedule</span></h2>
+          <p className="text-slate-400 max-w-2xl mx-auto">Our weekly schedule and duty roster to keep our class organized and running smoothly.</p>
         </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Class <span className="text-emerald-400 text-glow">Schedule</span></h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">Our weekly schedule and duty roster to keep our class organized and running smoothly.</p>
-          </div>
-          
-          <div className="glass-dark rounded-xl p-6 border border-white/5 shadow-xl max-w-4xl mx-auto transform transition-all duration-700" style={{ 
-            transform: `translateY(${Math.min(0, (scrollY - 1400) / 5)}px)`,
+        
+        <div 
+          className="glass-dark rounded-xl p-6 border border-white/5 shadow-xl max-w-4xl mx-auto section-animate transform-gpu"
+          style={{ 
+            transform: `translate3d(0, ${Math.min(0, (scrollY - 1400) / 5)}px, 0)`,
             opacity: Math.min(1, Math.max(0, (scrollY - 1200) / 300))
           }}>
             <h3 className="text-2xl font-bold mb-6 text-center">Jadwal Piket</h3>
@@ -546,7 +593,7 @@ function App() {
                 description: "Learning together in our classroom"
               },
               {
-                video: "https://www.youtube.com/embed/zt-xhMDNKhY?autoplay=1&controls=0&mute=1&loop=1&playlist=zt-xhMDNKhY",
+                video: "https://rubim1.github.io/video/kontol.mp4",
                 title: "Togetherness", 
                 description: "A description of the togetherness/solidarity/camaraderie between students and their homeroom teacher.",
                 autoPlay: true
@@ -564,18 +611,18 @@ function App() {
               >
                 {item.video ? (
                   <div className="relative w-full h-full">
-                    <div className="absolute inset-0 z-10" />
-                    <iframe 
+                    <video
                       src={item.video}
-                      className="w-full h-full object-cover pointer-events-none"
-                      title={item.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      style={{ 
-                        width: '2000%',    // 20x lebih besar
-                        height: '2000%',   // 20x lebih besar
-                        transform: 'scale(0.05)', // Scale 1/20
-                        transformOrigin: '0 0'
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
                       }}
                     />
                   </div>
