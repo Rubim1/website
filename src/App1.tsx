@@ -18,7 +18,6 @@ import {
   Award,
   Rocket
 } from 'lucide-react';
-import Loading from './components/Loading';
 
 function App() {
   const [currentText, setCurrentText] = useState('We Are');
@@ -32,7 +31,6 @@ function App() {
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const heroRef = useRef(null);
   const aboutRef = useRef(null);
@@ -132,12 +130,6 @@ function App() {
     }, 500);
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }, []);
-
   const handleNavClick = (section) => {
     setActiveSection(section);
     setIsMenuOpen(false);
@@ -184,8 +176,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white transition-all duration-500 overflow-hidden overflow-x-hidden">
-      {isLoading && <Loading />}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white transition-all duration-500 overflow-x-hidden">
       <style>
         {`
           html {
@@ -554,7 +545,7 @@ function App() {
           }}>
             <h3 className="text-2xl font-bold mb-6 text-center">Jadwal Piket</h3>
             
-            <div className="flex items-center justify-center flex-wrap">
+            <div className="flex items-center justify-center">
               {[
                 { day: "Monday", students: ["Mirza", "Zevilia", "Kiano", "Dafa", "Ochi", "Radhit"] },
                 { day: "Tuesday", students: ["Reno", "Yayan", "Shina", "Yazan", "Fiya", "Rexa"] },
@@ -565,7 +556,7 @@ function App() {
               ].map((schedule, index) => (
                 <div 
                   key={index} 
-                  className="glass rounded-lg p-4 w-1/2 sm:w-1/3 md:w-1/6 mx-2 transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 group mb-4"
+                  className="glass rounded-lg p-4 w-1/6 mx-2 transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 group"
                 >
                   <h4 className="font-bold text-emerald-400 mb-2 group-hover:text-glow transition-all text-center">{schedule.day}</h4>
                   <ul className="space-y-1 text-sm">
@@ -636,12 +627,13 @@ function App() {
                     />
                   </div>
                 ) : (
-                  <img                    src={item.image} 
+                  <img 
+                    src={item.image} 
                     alt={item.title} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 totransparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                   <div className="p-6">
                     <h3 className="text-xl font-bold">{item.title}</h3>
                     <p className="text-sm text-slate-300">{item.description}</p>
@@ -699,4 +691,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
