@@ -271,7 +271,7 @@ const DeveloperSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   <span className="relative">
-                    Itsbymz(rubim)
+                    Itsbymz
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
