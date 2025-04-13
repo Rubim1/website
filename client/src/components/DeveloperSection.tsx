@@ -12,10 +12,11 @@ const DeveloperSection: React.FC = () => {
 
   // Social media links with actual URLs
   const socialLinks = [
-    { platform: 'instagram', icon: 'fa-instagram', color: 'from-purple-600 to-pink-600', url: 'https://www.instagram.com/itsbymz' },
+    { platform: 'instagram', icon: 'fa-instagram', color: 'from-purple-600 to-pink-600', url: 'https://www.instagram.com/itsbymz2' },
+    { platform: 'whatsapp', icon: 'fa-whatsapp', color: 'from-green-500 to-green-700', url: 'https://wa.me/6289522749532' },
     { platform: 'discord', icon: 'fa-discord', color: 'from-indigo-600 to-indigo-800', url: 'https://discord.gg/example' },
     { platform: 'github', icon: 'fa-github', color: 'from-gray-700 to-gray-900', url: 'https://github.com/rubim1' },
-    { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbymz' }
+    { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbym' }
   ];
 
   // Dev habits/likes with progress
