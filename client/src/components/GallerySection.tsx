@@ -28,52 +28,52 @@ const galleryItems = [
   {
     id: 4,
     title: 'Momen Spesial',
-    description: 'Video dokumentasi kegiatan kelas yang penuh makna',
+    description: 'Momen ke rumah wali kelas',
     imageUrl: 'https://rubim1.github.io/video/vid1.mp4',
     videoUrl: 'https://rubim1.github.io/video/vid1.mp4',
     type: 'video'
   },
   {
     id: 5,
-    title: 'Keseruan Kelas',
-    description: 'Video kompilasi aktivitas seru di kelas kita',
+    title: 'Keseruan teman-teman Kelas',
+    description: 'Video kompilasi aktivitas seru kelas kita',
     imageUrl: 'https://rubim1.github.io/video/vid2.mp4',
     videoUrl: 'https://rubim1.github.io/video/vid2.mp4',
     type: 'video'
   },
   {
     id: 6,
-    title: 'Kenangan Terindah',
-    description: 'Momen-momen berharga yang akan selalu kita ingat',
+    title: 'Makan bersama',
+    description: 'makan bersama teman-teman kelas di rumah wali kelas',
     imageUrl: 'https://rubim1.github.io/video/vid3.mp4',
     videoUrl: 'https://rubim1.github.io/video/vid3.mp4',
     type: 'video'
   },
   {
     id: 7,
-    title: 'Potret Keakraban',
-    description: 'Kebersamaan yang membuat kita semakin dekat',
+    title: 'Berbuka bersama',
+    description: 'berbuka bersama teman-teman kelas',
     imageUrl: 'https://rubim1.github.io/video/4.jpg',
     type: 'image'
   },
   {
     id: 8,
-    title: 'Momen Bersama',
-    description: 'Setiap momen bersama adalah kenangan yang tak tergantikan',
+    title: 'Melaksanakan Projek Penguatan Profil Pancasila',
+    description: 'melaksanakan projek penguatan profil pancasila',
     imageUrl: 'https://rubim1.github.io/video/5.jpg',
     type: 'image'
   },
   {
     id: 9,
-    title: 'Keseruan Tak Terlupakan',
-    description: 'Saat-saat menyenangkan yang selalu kita nantikan',
+    title: 'Ramadan islamic culture',
+    description: 'melaksanakan projek penguatan profil pancasila',
     imageUrl: 'https://rubim1.github.io/video/6.jpg',
     type: 'image'
   },
   {
     id: 10,
-    title: 'Kenangan Masa Sekolah',
-    description: 'Potret kebersamaan di masa-masa sekolah yang berharga',
+    title: 'Berlatih untuk acara PESONAMU',
+    description: 'berlatih untuk acara PESONAMU',
     imageUrl: 'https://rubim1.github.io/video/7.jpg',
     type: 'image'
   },
