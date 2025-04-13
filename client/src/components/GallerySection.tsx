@@ -120,13 +120,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
         onClick={e => e.stopPropagation()}
       >
         <div className="aspect-video w-full">
-          <iframe 
+          <video 
             src={videoUrl} 
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
+            controls
             className="w-full h-full"
-          ></iframe>
+            autoPlay
+          />
         </div>
         <div className="p-6">
           <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
@@ -247,13 +246,16 @@ const GallerySection: React.FC = () => {
                   />
                 ) : (
                   <div className="relative w-full h-full">
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover" 
+                    <video
+                      src={item.videoUrl}
+                      className="w-full h-full object-cover"
+                      loop
+                      muted
+                      autoPlay
+                      playsInline
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-16 h-16 bg-primary/80 rounded-full flex items-center justify-center pulse-animation">
+                      <div className="w-16 h-16 bg-primary/80 rounded-full flex items-center justify-center pulse-animation cursor-pointer">
                         <i className="fas fa-play text-white text-xl"></i>
                       </div>
                     </div>
@@ -270,7 +272,6 @@ const GallerySection: React.FC = () => {
                   className="frame-impact px-4 py-2 bg-primary/80 hover:bg-primary rounded-lg text-white text-sm transition-colors flex items-center gap-2"
                   onClick={() => {
                     if (item.type === 'video' && item.videoUrl) {
-                      // Open a video modal - we'll need to create this functionality
                       handleVideoOpen(item);
                     } else {
                       openImageModal(item.imageUrl, item.title, item.description);
