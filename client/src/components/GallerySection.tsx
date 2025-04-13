@@ -6,23 +6,23 @@ import { useAppContext } from '@/contexts/AppContext';
 const galleryItems = [
   {
     id: 1,
-    title: 'Kebersamaan Kelas',
-    description: 'Momen indah saat kita berkumpul bersama, berbagi cerita dan tawa',
-    imageUrl: 'https://rubim1.github.io/video/1.jpg',
+    title: 'foto kelas',
+    description: 'Foto kelas untuk kalender',
+    imageUrl: 'https://rubim1.github.io/video/14.jpg',
     type: 'image'
   },
   {
     id: 2,
-    title: 'Kenangan Manis',
-    description: 'Setiap foto menyimpan sejuta kenangan yang tak terlupakan',
-    imageUrl: 'https://rubim1.github.io/video/2.jpg',
+    title: 'foto kelas saat selesai PESONAMU',
+    description: 'foto kelas saat selesai PESONAMU',
+    imageUrl: 'https://rubim1.github.io/video/15.jpg',
     type: 'image'
   },
   {
     id: 3,
-    title: 'Keceriaan Bersama',
-    description: 'Saat-saat bahagia yang selalu kita rayakan bersama',
-    imageUrl: 'https://rubim1.github.io/video/3.jpg',
+    title: 'foto kelas saat selesai PESONAMU',
+    description: 'foto kelas saat selesai PESONAMU',
+    imageUrl: 'https://rubim1.github.io/video/16.jpg',
     type: 'image'
   },
   {
@@ -66,7 +66,7 @@ const galleryItems = [
   {
     id: 9,
     title: 'Ramadan islamic culture',
-    description: 'melaksanakan projek penguatan profil pancasila',
+    description: 'melaksanakan PAISLOVE',
     imageUrl: 'https://rubim1.github.io/video/6.jpg',
     type: 'image'
   },
