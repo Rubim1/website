@@ -375,7 +375,7 @@ const DeveloperSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   <span className="relative">
-                    Itsbymz(rubim)
+                    Itsbymz
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
@@ -558,7 +558,7 @@ const DeveloperSection: React.FC = () => {
             <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8 mb-8">
               <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center">
                 <i className="fas fa-heart text-accent mr-3"></i>
-                <span>Kebiasaan/Kesukaan Dev</span>
+                <span>Kebiasaan/Kesukaan Dev (itsbymz)</span>
               </h3>
               
               <div className="space-y-6">
