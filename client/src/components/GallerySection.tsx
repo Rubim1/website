@@ -6,46 +6,89 @@ import { useAppContext } from '@/contexts/AppContext';
 const galleryItems = [
   {
     id: 1,
-    title: 'Class Activities',
-    description: 'Learning and growing together in our daily activities',
-    imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1632&q=80',
+    title: 'Kebersamaan Kelas',
+    description: 'Momen indah saat kita berkumpul bersama, berbagi cerita dan tawa',
+    imageUrl: 'https://rubim1.github.io/video/1.jpg',
     type: 'image'
   },
   {
     id: 2,
-    title: 'Togetherness',
-    description: 'A description of the togetherness/solidarity/camaraderie between students and their homeroom teacher.',
-    imageUrl: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80',
+    title: 'Kenangan Manis',
+    description: 'Setiap foto menyimpan sejuta kenangan yang tak terlupakan',
+    imageUrl: 'https://rubim1.github.io/video/2.jpg',
     type: 'image'
   },
   {
     id: 3,
-    title: 'Field Trip',
-    description: 'Exploring and learning outside the classroom',
-    imageUrl: 'https://images.unsplash.com/photo-1540151812223-c30b3fab58e6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
+    title: 'Keceriaan Bersama',
+    description: 'Saat-saat bahagia yang selalu kita rayakan bersama',
+    imageUrl: 'https://rubim1.github.io/video/3.jpg',
     type: 'image'
   },
   {
     id: 4,
-    title: 'Together We Learn, Together We Excel',
-    description: 'A motivational video showcasing our commitment to excellence and the power of learning together',
-    imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1',
+    title: 'Momen Spesial',
+    description: 'Video dokumentasi kegiatan kelas yang penuh makna',
+    imageUrl: 'https://rubim1.github.io/video/vid1.mp4',
+    videoUrl: 'https://rubim1.github.io/video/vid1.mp4',
     type: 'video'
   },
   {
     id: 5,
-    title: 'Music Performance',
-    description: 'Our talented students performing at the annual showcase',
-    imageUrl: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    videoUrl: 'https://www.youtube.com/embed/EExwffrNBMg?autoplay=1',
+    title: 'Keseruan Kelas',
+    description: 'Video kompilasi aktivitas seru di kelas kita',
+    imageUrl: 'https://rubim1.github.io/video/vid2.mp4',
+    videoUrl: 'https://rubim1.github.io/video/vid2.mp4',
     type: 'video'
   },
   {
     id: 6,
-    title: 'Class Creativity',
-    description: 'Creative projects displayed in our annual exhibition',
-    imageUrl: 'https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    title: 'Kenangan Terindah',
+    description: 'Momen-momen berharga yang akan selalu kita ingat',
+    imageUrl: 'https://rubim1.github.io/video/vid3.mp4',
+    videoUrl: 'https://rubim1.github.io/video/vid3.mp4',
+    type: 'video'
+  },
+  {
+    id: 7,
+    title: 'Potret Keakraban',
+    description: 'Kebersamaan yang membuat kita semakin dekat',
+    imageUrl: 'https://rubim1.github.io/video/4.jpg',
+    type: 'image'
+  },
+  {
+    id: 8,
+    title: 'Momen Bersama',
+    description: 'Setiap momen bersama adalah kenangan yang tak tergantikan',
+    imageUrl: 'https://rubim1.github.io/video/5.jpg',
+    type: 'image'
+  },
+  {
+    id: 9,
+    title: 'Keseruan Tak Terlupakan',
+    description: 'Saat-saat menyenangkan yang selalu kita nantikan',
+    imageUrl: 'https://rubim1.github.io/video/6.jpg',
+    type: 'image'
+  },
+  {
+    id: 10,
+    title: 'Kenangan Masa Sekolah',
+    description: 'Potret kebersamaan di masa-masa sekolah yang berharga',
+    imageUrl: 'https://rubim1.github.io/video/7.jpg',
+    type: 'image'
+  },
+  {
+    id: 11,
+    title: 'Momen Kebersamaan',
+    description: 'Kebersamaan yang membuat kita semakin solid',
+    imageUrl: 'https://rubim1.github.io/video/8.jpg',
+    type: 'image'
+  },
+  {
+    id: 12,
+    title: 'Potret Keceriaan',
+    description: 'Keceriaan yang terpancar dari setiap wajah',
+    imageUrl: 'https://rubim1.github.io/video/9.jpg',
     type: 'image'
   }
 ];
