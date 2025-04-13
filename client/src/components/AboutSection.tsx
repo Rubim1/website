@@ -202,6 +202,72 @@ const AboutSection: React.FC = () => {
             </div>
           </div>
         </motion.div>
+        
+        {/* Homeroom Teacher Section */}
+        <motion.div 
+          className="text-center mt-16 mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <h3 className="text-2xl font-semibold text-accent mb-6">Our Homeroom Teacher</h3>
+          
+          <div className="bg-black/50 backdrop-blur-md rounded-xl p-8 border border-white/10 shadow-lg max-w-2xl mx-auto">
+            <div className="flex flex-col items-center">
+              <div className="relative w-48 h-48 mb-6">
+                <div className="absolute inset-0 rounded-full border-2 border-accent/50 animate-pulse-slow"></div>
+                <motion.div 
+                  className="w-full h-full rounded-full overflow-hidden border-2 border-accent/30"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img 
+                    src="https://rubim1.github.io/video/walikelas.jpg" 
+                    alt="Siti Usalawati, S.Pd" 
+                    className="w-full h-full object-cover" 
+                    onClick={() => openImageModal(
+                      "https://rubim1.github.io/video/walikelas.jpg",
+                      "Siti Usalawati, S.Pd",
+                      "Our dedicated homeroom teacher for Class 7A"
+                    )}
+                  />
+                </motion.div>
+                <div className="absolute inset-0 rounded-full border-2 border-accent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              
+              <motion.h4 
+                className="text-2xl font-bold text-white mb-2"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                Siti Usalawati, S.Pd
+              </motion.h4>
+              
+              <motion.p 
+                className="text-xl text-accent mb-4"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
+                Wali Kelas 7A
+              </motion.p>
+              
+              <motion.p 
+                className="text-gray-300 max-w-lg"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
+                Our dedicated homeroom teacher who guides us through our educational journey with patience, wisdom, and care.
+              </motion.p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

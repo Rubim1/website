@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import * as THREE from 'three';
 
+// Add THREE to window type for TypeScript
+declare global {
+  interface Window {
+    THREE: typeof THREE;
+  }
+}
+
 const DeveloperSection: React.FC = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -12,11 +19,10 @@ const DeveloperSection: React.FC = () => {
 
   // Social media links with actual URLs
   const socialLinks = [
-    { platform: 'instagram', icon: 'fa-instagram', color: 'from-purple-600 to-pink-600', url: 'https://www.instagram.com/itsbymz2' },
-    { platform: 'whatsapp', icon: 'fa-whatsapp', color: 'from-green-500 to-green-700', url: 'https://wa.me/6289522749532' },
+    { platform: 'instagram', icon: 'fa-instagram', color: 'from-purple-600 to-pink-600', url: 'https://www.instagram.com/itsbymz' },
     { platform: 'discord', icon: 'fa-discord', color: 'from-indigo-600 to-indigo-800', url: 'https://discord.gg/example' },
     { platform: 'github', icon: 'fa-github', color: 'from-gray-700 to-gray-900', url: 'https://github.com/rubim1' },
-    { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbym' }
+    { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbymz' }
   ];
 
   // Dev habits/likes with progress
@@ -53,7 +59,7 @@ const DeveloperSection: React.FC = () => {
 
   // Three.js effect
   useEffect(() => {
-    if (canvasRef.current && window.THREE) {
+    if (canvasRef.current) {
       const container = canvasRef.current;
       const scene = new THREE.Scene();
       
@@ -221,9 +227,9 @@ const DeveloperSection: React.FC = () => {
           </p>
         </motion.div>
         
-        {/* Developer Profile */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
-          {/* Left Column - Profile Card */}
+        {/* Developer Profiles */}
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 max-w-6xl mx-auto mb-16">
+          {/* First Developer - @qinvibes */}
           <motion.div 
             className="lg:col-span-2 relative"
             initial={{ opacity: 0, x: -30 }}
@@ -231,7 +237,104 @@ const DeveloperSection: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            {/* Main profile card */}
+            {/* @qinvibes profile card */}
+            <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
+              {/* Glowing edges */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+              </div>
+              
+              <div className="p-6 md:p-8 flex flex-col items-center">
+                {/* Profile Image with Aura */}
+                <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
+                  {/* Image auras */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+                  
+                  {/* Actual image */}
+                  <motion.div 
+                    className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
+                  >
+                    <img 
+                      src="https://rubim1.github.io/video/pfp2.jpg" 
+                      alt="@qinvibes Profile" 
+                      className="w-full h-full object-cover" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  </motion.div>
+                </div>
+                
+                {/* Name and Title */}
+                <motion.h3 
+                  className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <span className="relative">
+                    @qinvibes
+                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
+                  </span>
+                </motion.h3>
+                
+                <motion.p 
+                  className="text-xl text-accent mb-6 text-center"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  Digital Management Class Journal Holder
+                </motion.p>
+                
+                {/* Description */}
+                <div className="h-24 mb-6">
+                  <motion.p 
+                    className="text-gray-300 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    just vibes & sunsets
+                  </motion.p>
+                </div>
+                
+                {/* Placeholder for spacing */}
+                <div className="mb-8"></div>
+                
+                {/* Journal Button */}
+                <motion.a 
+                  href="#"
+                  className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <i className="fas fa-book mr-2"></i> Journal Button
+                </motion.a>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Middle Developer - Itsbymz(rubim) */}
+          <motion.div 
+            className="lg:col-span-2 relative"
+            initial={{ opacity: 0, y: -30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            {/* Profile card */}
             <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
               {/* Glowing edges */}
               <div className="absolute inset-0 overflow-hidden">
@@ -256,7 +359,7 @@ const DeveloperSection: React.FC = () => {
                   >
                     <img 
                       src="https://rubim1.github.io/video/pfp.jpg" 
-                      alt="Developer Profile" 
+                      alt="Itsbymz(rubim) Profile" 
                       className="w-full h-full object-cover" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
@@ -272,7 +375,7 @@ const DeveloperSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   <span className="relative">
-                    Itsbymz
+                    Itsbymz(rubim)
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
@@ -341,6 +444,103 @@ const DeveloperSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
                   <i className="fas fa-file-alt mr-2"></i> Download Resume
+                </motion.a>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Third Developer - nanashii */}
+          <motion.div 
+            className="lg:col-span-2 relative"
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {/* Profile card */}
+            <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
+              {/* Glowing edges */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+                <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+              </div>
+              
+              <div className="p-6 md:p-8 flex flex-col items-center">
+                {/* Profile Image with Aura */}
+                <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
+                  {/* Image auras */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+                  
+                  {/* Actual image */}
+                  <motion.div 
+                    className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
+                  >
+                    <img 
+                      src="https://rubim1.github.io/video/pfp3.jpg" 
+                      alt="nanashii Profile" 
+                      className="w-full h-full object-cover" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  </motion.div>
+                </div>
+                
+                {/* Name and Title */}
+                <motion.h3 
+                  className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <span className="relative">
+                    nanashii
+                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
+                  </span>
+                </motion.h3>
+                
+                <motion.p 
+                  className="text-xl text-accent mb-6 text-center"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  Digital Management Finance Holder
+                </motion.p>
+                
+                {/* Description */}
+                <div className="h-24 mb-6">
+                  <motion.p 
+                    className="text-gray-300 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    mulfand
+                  </motion.p>
+                </div>
+                
+                {/* Placeholder for spacing */}
+                <div className="mb-8"></div>
+                
+                {/* Finance Button */}
+                <motion.a 
+                  href="#"
+                  className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <i className="fas fa-money-bill-wave mr-2"></i> Finance Button
                 </motion.a>
               </div>
             </div>
