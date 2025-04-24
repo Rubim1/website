@@ -6,8 +6,8 @@ import DeveloperSection from '@/components/DeveloperSection';
 import ScheduleSection from '@/components/ScheduleSection';
 import GallerySection from '@/components/GallerySection';
 import CalendarSection from '@/components/CalendarSection';
+import ChatSection from '@/components/ChatSection';
 import Footer from '@/components/Footer';
-import ParticleBackground from '@/components/ParticleBackground';
 import ImageModal from '@/components/ImageModal';
 import MusicPlayer from '@/components/MusicPlayer';
 import { useAppContext } from '@/contexts/AppContext';
@@ -21,17 +21,19 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-background text-foreground font-poppins overflow-x-hidden min-h-screen">
-      <ParticleBackground />
-      <Navbar />
-      
-      <HeroSection />
-      <AboutSection />
-      <DeveloperSection />
-      <CalendarSection />
-      <ScheduleSection />
-      <GallerySection />
-      <Footer />
+    <div className="bg-transparent text-foreground font-poppins overflow-x-hidden min-h-screen relative">
+      {/* Content container with higher z-index to appear above the Spline background */}
+      <div className="relative z-10">
+        <Navbar />
+        <HeroSection />
+        <AboutSection />
+        <DeveloperSection />
+        <CalendarSection />
+        <ScheduleSection />
+        <GallerySection />
+        <ChatSection />
+        <Footer />
+      </div>
       
       {/* Music Player */}
       <MusicPlayer />

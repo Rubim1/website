@@ -1,34 +1,45 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/contexts/AppContext';
+import { createRipple } from '@/lib/microInteractions';
+
+// Values for the class
+const values = [
+  "Excellence in everything we do",
+  "Respect for each other and our teachers",
+  "Collaboration and teamwork",
+  "Creativity and innovation",
+  "Perseverance and determination"
+];
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const starVariants = {
+  animate: {
+    rotate: [0, -10, 10, -5, 5, 0],
+    scale: [1, 1.2, 0.9, 1.1, 1],
+    transition: { duration: 0.6 }
+  }
+};
 
 const AboutSection: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const togethernessVideoRef = useRef<HTMLVideoElement>(null);
   const { openImageModal } = useAppContext();
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const values = [
-    "Excellence in everything we do",
-    "Respect for each other and our teachers",
-    "Collaboration and teamwork",
-    "Creativity and innovation",
-    "Perseverance and determination"
-  ];
 
   // Function to handle video click
   const handleVideoClick = (videoElement: HTMLVideoElement | null, title: string) => {
@@ -99,17 +110,42 @@ const AboutSection: React.FC = () => {
             variants={itemVariants}
           >
             <h3 className="text-2xl font-semibold text-accent mb-4">Our Values</h3>
-            <ul className="text-gray-300 space-y-2">
+            <ul className="text-gray-300 space-y-3">
               {values.map((value, index) => (
                 <motion.li 
                   key={index} 
-                  className="flex items-center"
+                  className="flex items-center group p-2 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer ripple-container"
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + (index * 0.1) }}
                   viewport={{ once: true }}
+                  whileHover={{ x: 5 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => createRipple(e)}
                 >
-                  <i className="fas fa-star text-accent mr-2"></i> {value}
+                  <motion.div 
+                    className="mr-3 text-accent"
+                    whileHover={{
+                      rotate: [0, -10, 10, -5, 5, 0],
+                      scale: [1, 1.2, 0.9, 1.1, 1],
+                      transition: { duration: 0.6 }
+                    }}
+                  >
+                    <motion.i 
+                      className="fas fa-star" 
+                      style={{ display: 'inline-block' }}
+                    />
+                  </motion.div>
+                  
+                  <motion.span 
+                    whileHover={{ 
+                      color: '#fff',
+                      textShadow: '0 0 5px rgba(0, 191, 255, 0.5)'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {value}
+                  </motion.span>
                 </motion.li>
               ))}
             </ul>

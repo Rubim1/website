@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import { AppProvider } from "@/contexts/AppContext";
+import { Theme3DProvider } from "@/contexts/Theme3DContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import SmoothScroll from "@/components/SmoothScroll";
 import { useState, useEffect } from "react";
@@ -34,14 +35,16 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <LoadingScreen />
-        <SmoothScroll>
-          <Router />
-          {musicPlayerInstance}
-          <Toaster />
-        </SmoothScroll>
-      </AppProvider>
+      <Theme3DProvider>
+        <AppProvider>
+          <LoadingScreen />
+          <SmoothScroll>
+            <Router />
+            {musicPlayerInstance}
+            <Toaster />
+          </SmoothScroll>
+        </AppProvider>
+      </Theme3DProvider>
     </QueryClientProvider>
   );
 }

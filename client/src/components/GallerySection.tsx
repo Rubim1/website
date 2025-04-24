@@ -272,6 +272,7 @@ const GallerySection: React.FC = () => {
                   className="frame-impact px-4 py-2 bg-primary/80 hover:bg-primary rounded-lg text-white text-sm transition-colors flex items-center gap-2"
                   onClick={() => {
                     if (item.type === 'video' && item.videoUrl) {
+                      // Open a video modal - we'll need to create this functionality
                       handleVideoOpen(item);
                     } else {
                       openImageModal(item.imageUrl, item.title, item.description);

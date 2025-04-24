@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createRipple, magneticEffect } from '@/lib/microInteractions';
 
 // Helper functions to extract IDs from URLs
 const getYoutubeID = (url: string) => {
@@ -262,15 +264,21 @@ const MusicPlayer: React.FC = () => {
   return (
     <div className={`audio-player ${minimized ? 'minimized' : ''}`}>
       <button 
-        className="audio-player-toggle" 
-        onClick={() => setMinimized(!minimized)}
+        className="audio-player-toggle relative overflow-hidden" 
+        onClick={(e) => {
+          createRipple(e);
+          setMinimized(!minimized);
+        }}
       >
-        {minimized ? <i className="fas fa-expand"></i> : <i className="fas fa-compress"></i>}
+        <i className={`fas ${minimized ? 'fa-expand' : 'fa-compress'} text-blue-300`}></i>
       </button>
 
       {minimized ? (
-        <div className="flex items-center justify-center h-full cursor-pointer" onClick={() => setMinimized(false)}>
-          <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-2xl text-white`}></i>
+        <div 
+          className="flex items-center justify-center h-full cursor-pointer" 
+          onClick={() => setMinimized(false)}
+        >
+          <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-2xl text-blue-300`}></i>
         </div>
       ) : (
         <>
@@ -359,7 +367,9 @@ const MusicPlayer: React.FC = () => {
                 <Button
                   variant="ghost" 
                   size="icon"
-                  onClick={() => {
+                  className="relative overflow-hidden hover:bg-blue-900/20 hover:text-blue-300 transition-all"
+                  onClick={(e) => {
+                    createRipple(e);
                     if (currentSong && songs.length > 0) {
                       const currentIndex = songs.findIndex(song => song.id === currentSong.id);
                       const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
@@ -367,19 +377,25 @@ const MusicPlayer: React.FC = () => {
                     }
                   }}
                 >
-                  <i className="fas fa-backward text-white"></i>
+                  <i className="fas fa-backward text-blue-300"></i>
                 </Button>
                 <Button
                   variant="ghost" 
                   size="icon"
-                  onClick={togglePlay}
+                  className="relative overflow-hidden hover:bg-blue-900/20 hover:text-blue-300 transition-all"
+                  onClick={(e) => {
+                    createRipple(e);
+                    togglePlay();
+                  }}
                 >
-                  <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-white text-xl`}></i>
+                  <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-blue-300 text-xl`}></i>
                 </Button>
                 <Button
                   variant="ghost" 
                   size="icon"
-                  onClick={() => {
+                  className="relative overflow-hidden hover:bg-blue-900/20 hover:text-blue-300 transition-all"
+                  onClick={(e) => {
+                    createRipple(e);
                     if (currentSong && songs.length > 0) {
                       const currentIndex = songs.findIndex(song => song.id === currentSong.id);
                       const nextIndex = (currentIndex + 1) % songs.length;
@@ -387,7 +403,7 @@ const MusicPlayer: React.FC = () => {
                     }
                   }}
                 >
-                  <i className="fas fa-forward text-white"></i>
+                  <i className="fas fa-forward text-blue-300"></i>
                 </Button>
               </div>
 
@@ -441,18 +457,26 @@ const MusicPlayer: React.FC = () => {
           {/* Song list */}
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-white mb-2">Songs:</h4>
-            <div className="max-h-32 overflow-y-auto">
+            <div className="max-h-32 overflow-y-auto custom-scrollbar">
               {songs.map(song => (
                 <div 
                   key={song.id}
-                  className={`p-2 rounded cursor-pointer hover:bg-gray-800 flex items-center ${currentSong?.id === song.id ? 'bg-gray-800' : ''}`}
-                  onClick={() => setCurrentSong(song)}
+                  className={`p-2 rounded cursor-pointer relative overflow-hidden hover:bg-blue-900/20 transition-all duration-200 flex items-center ${currentSong?.id === song.id ? 'bg-blue-900/30 border-l-2 border-blue-400' : ''}`}
+                  onClick={(e) => {
+                    createRipple(e);
+                    setCurrentSong(song);
+                  }}
                 >
-                  <i className={`fas fa-${song.type === 'local' ? 'music' : song.type} text-gray-400 mr-2`}></i>
+                  <i className={`fas fa-${song.type === 'local' ? 'music' : song.type} text-blue-300 mr-2`}></i>
                   <div className="overflow-hidden">
                     <div className="text-sm text-white truncate">{song.title}</div>
-                    <div className="text-xs text-gray-400 truncate">{song.artist}</div>
+                    <div className="text-xs text-blue-300/70 truncate">{song.artist}</div>
                   </div>
+                  {currentSong?.id === song.id && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <i className="fas fa-volume-up text-blue-300 text-xs animate-pulse"></i>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
