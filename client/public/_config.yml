@@ -1,0 +1,7 @@
+include:
+  - "_*"
+
+exclude:
+  - "README.md"
+
+# This config allows GitHub Pages to serve files beginning with underscore

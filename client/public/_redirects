@@ -1,0 +1,3 @@
+# Netlify-style redirects file (for GitHub Pages with action-gh-pages)
+/api/*   https://your-api-url.com/api/:splat  200
+/*       /index.html                           200

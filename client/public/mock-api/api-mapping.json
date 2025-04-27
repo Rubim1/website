@@ -1,0 +1,4 @@
+{
+  "/api/chat/messages": "/mock-api/chat-messages.json",
+  "/api/ai/models": "/mock-api/ai-models.json"
+}

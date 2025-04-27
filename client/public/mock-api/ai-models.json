@@ -1,0 +1,32 @@
+{
+  "deepseek-coder": {
+    "name": "deepseek-coder",
+    "provider": "deepseek",
+    "description": "A powerful code-focused AI model by DeepSeek",
+    "hasVision": false
+  },
+  "deepseek-chat": {
+    "name": "deepseek-chat",
+    "provider": "deepseek",
+    "description": "A general-purpose chat model by DeepSeek",
+    "hasVision": false
+  },
+  "deepseek-vision": {
+    "name": "deepseek-vision",
+    "provider": "deepseek",
+    "description": "Vision-capable model by DeepSeek for analyzing images",
+    "hasVision": true
+  },
+  "gemini-pro": {
+    "name": "gemini-pro",
+    "provider": "gemini",
+    "description": "Google's Gemini Pro model for advanced conversations",
+    "hasVision": false
+  },
+  "gemini-vision-pro": {
+    "name": "gemini-vision-pro",
+    "provider": "gemini",
+    "description": "Google's vision-capable Gemini model for image analysis",
+    "hasVision": true
+  }
+}
