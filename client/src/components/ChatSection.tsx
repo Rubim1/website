@@ -68,8 +68,8 @@ const ChatSection: React.FC = () => {
     
     if (isOnGitHubPages) {
       toast({
-        title: "GitHub Pages Mode",
-        description: "Running in static mode. WebSocket chat functionality is limited.",
+        title: "Firebase Realtime Mode",
+        description: "Running with Firebase Realtime Database for chat synchronization.",
         duration: 5000,
       });
       

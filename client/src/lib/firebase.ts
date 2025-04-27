@@ -1,15 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue, push, set, serverTimestamp } from "firebase/database";
 
-// Firebase configuration - these will need to be replaced with your own Firebase project details
+// Firebase configuration with your provided credentials
 const firebaseConfig = {
-  apiKey: "AIzaSyBeHOlOQXO9_XXBOYHk3nSEELv9iajk20Y",
-  authDomain: "class-chat-app-3795a.firebaseapp.com",
-  databaseURL: "https://class-chat-app-3795a-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "class-chat-app-3795a",
-  storageBucket: "class-chat-app-3795a.appspot.com",
-  messagingSenderId: "823678097842",
-  appId: "1:823678097842:web:f2c60456d9b3eff8fc2b9e"
+  apiKey: "AIzaSyD9VHCLkIOhPBWM_PJ1eIlZesFB_d-0jJo",
+  authDomain: "chat-77e24.firebaseapp.com",
+  databaseURL: "https://chat-77e24-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chat-77e24",
+  storageBucket: "chat-77e24.appspot.com",
+  messagingSenderId: "989714979824",
+  appId: "1:989714979824:web:472950afb6a0744b13db35"
 };
 
 // Initialize Firebase
