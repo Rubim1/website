@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { Avatar } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
+import { sendMessage, subscribeToMessages, FirebaseMessage } from '@/lib/firebase';
 
 interface ChatMessage {
   id: string;
@@ -79,24 +80,25 @@ const ChatSection: React.FC = () => {
 
   // Function to fetch messages from the database
   const fetchMessagesFromDatabase = async () => {
-    // If we're on GitHub Pages, just use localStorage and don't try to fetch from API
+    // If we're on GitHub Pages, use Firebase Realtime Database for real-time chat
     if (isGitHubPages) {
-      console.log('Running on GitHub Pages - Using local storage for messages');
-      const savedMessages = localStorage.getItem('chat_messages');
-      if (savedMessages) {
-        try {
-          const parsedMessages = JSON.parse(savedMessages);
-          // Ensure dates are properly converted back to Date objects
-          const messagesWithDateObjects = parsedMessages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp)
-          }));
-          // Only keep the last 50 messages to prevent performance issues
-          setMessages(messagesWithDateObjects.slice(-50));
-        } catch (error) {
-          console.error('Error parsing saved messages:', error);
-        }
-      }
+      console.log('Running on GitHub Pages - Using Firebase for real-time chat');
+      
+      // Subscribe to Firebase messages
+      subscribeToMessages((firebaseMessages) => {
+        // Convert Firebase messages to our app's message format
+        const convertedMessages = firebaseMessages.map(msg => ({
+          id: msg.id,
+          name: msg.name,
+          photoUrl: msg.photoUrl,
+          text: msg.text,
+          timestamp: new Date(msg.timestamp)
+        }));
+        
+        console.log(`Loaded ${convertedMessages.length} messages from Firebase`);
+        setMessages(convertedMessages);
+      });
+      
       return;
     }
     
@@ -204,23 +206,23 @@ const ChatSection: React.FC = () => {
   };
 
   const connectWebSocket = () => {
-    // If we're on GitHub Pages, don't try to connect to WebSocket
+    // If we're on GitHub Pages, use Firebase instead of WebSocket
     if (isGitHubPages) {
-      console.log('Running on GitHub Pages - WebSocket connection is not supported');
-      // Set a fake WebSocket connected state so the UI doesn't show "Connecting..."
+      console.log('Running on GitHub Pages - Using Firebase Realtime Database for chat');
+      // Set a connected state so the UI doesn't show "Connecting..."
       setIsWebSocketConnected(true);
       
-      // Add a simulated welcome message
+      // Add a welcome message for Firebase mode
       const welcomeMessage = {
         id: `github-pages-welcome-${Date.now()}`,
         name: "System",
-        photoUrl: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwYjhmZiIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4LTggOCAzLjU5IDggOC0zLjU5IDgtOCA4eiIvPjxwYXRoIGZpbGw9IiMwMGI4ZmYiIGQ9Ik0xMiA2Yy0zLjMxIDAtNiAyLjY5LTYgNnMyLjY5IDYgNiA2IDYtMi42OSA2LTYtMi42OS02LTYtNnptMCAxMGMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9zdmc+",
-        text: "GitHub Pages mode active. This is a limited version of the chat app. Messages will only be saved locally.",
+        photoUrl: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmYTUwMCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4LTggOCAzLjU5IDggOC0zLjU5IDgtOCA4eiIvPjxwYXRoIGZpbGw9IiNmZmE1MDAiIGQ9Ik0xMiA2Yy0zLjMxIDAtNiAyLjY5LTYgNnMyLjY5IDYgNiA2IDYtMi42OSA2LTYtMi42OS02LTYtNnptMCAxMGMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9zdmc+",
+        text: "GitHub Pages mode active with Firebase. You can chat in real-time across all users viewing this page!",
         timestamp: new Date()
       };
       
       // Only add if we don't have it already
-      if (!messages.some(msg => msg.text.includes("GitHub Pages mode active"))) {
+      if (!messages.some(msg => msg.text.includes("GitHub Pages mode active with Firebase"))) {
         setMessages(prev => [...prev, welcomeMessage]);
       }
       
@@ -340,10 +342,16 @@ const ChatSection: React.FC = () => {
       timestamp: new Date()
     };
 
-    // If on GitHub Pages, just save locally
+    // If on GitHub Pages, use Firebase Realtime Database
     if (isGitHubPages) {
-      // Just add message to local state since we can't use WebSockets
-      setMessages(prev => [...prev, message]);
+      // Send message to Firebase
+      sendMessage({
+        name: userProfile.name,
+        photoUrl: userProfile.photoUrl,
+        text: newMessage
+      });
+      
+      // Message will be added to the UI by the Firebase subscription
       setNewMessage('');
       return;
     }
@@ -570,7 +578,7 @@ const ChatSection: React.FC = () => {
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-accent animate-pulse mr-2"></div>
                   <h3 className="text-white font-medium">
-                    Chat Kelas {isGitHubPages ? 'Mode Statis' : (isWebSocketConnected ? 'Online' : 'Menghubungkan...')}
+                    Chat Kelas {isGitHubPages ? 'Firebase Realtime' : (isWebSocketConnected ? 'Online' : 'Menghubungkan...')}
                   </h3>
                 </div>
                 <div className="flex items-center space-x-4">
