@@ -25,3 +25,24 @@ Attempting to login via OAuth...
 --- 2025-04-27T06:36:28.953Z log
 Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20offline_access&state=w5o0SSL19W8LimvFzU9c3h7T-s.cg9hz&code_challenge=0mR7YgQOMurTgEYRV45ef1f4-Qj7zBFMw_odh5Oxv7s&code_challenge_method=S256
 ---
+
+--- 2025-04-27T06:38:28.983Z log
+
+---
+
+--- 2025-04-27T06:38:29.030Z error
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mTimed out waiting for authorization code, please try again.[0m
+
+
+---
+
+--- 2025-04-27T06:38:29.031Z debug
+Error: Timed out waiting for authorization code, please try again.
+    at Timeout.<anonymous> (/home/runner/workspace/.config/npm/node_global/lib/node_modules/wrangler/wrangler-dist/cli.js:90743:9)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+---
+
+--- 2025-04-27T06:38:29.032Z debug
+Metrics dispatcher: Posting data {"deviceId":"0bd9d29f-b422-4569-8b81-046c9808773b","event":"wrangler command errored","timestamp":1745735909032,"properties":{"amplitude_session_id":1745735787764,"amplitude_event_id":1,"wranglerVersion":"4.13.2","osPlatform":"Linux","osVersion":"#1-NixOS SMP PREEMPT_DYNAMIC Tue Jan  1 00:00:00 UTC 1980","nodeVersion":20,"isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"argsUsed":[],"argsCombination":"","command":"wrangler login","args":{"xJsonConfig":true,"j":true,"browser":true,"callbackHost":"<REDACTED>","callbackPort":8976},"durationMs":121284,"durationSeconds":121.284,"durationMinutes":2.0214000000000003,"errorType":"UserError"}}
+---

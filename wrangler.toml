@@ -1,0 +1,15 @@
+name = "class-chat-app"
+compatibility_date = "2025-04-27"
+
+# Pages configuration
+pages_build_output_dir = "dist"
+
+# Static site configuration
+[site]
+bucket = "./dist"
+
+# Routes configuration - ensures all routes go to index.html for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

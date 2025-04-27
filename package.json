@@ -75,6 +75,7 @@
     "three": "^0.175.0",
     "vaul": "^1.1.0",
     "wouter": "^3.3.5",
+    "wrangler": "^4.13.2",
     "ws": "^8.18.1",
     "zod": "^3.23.8",
     "zod-validation-error": "^3.4.0"
