@@ -4,6 +4,7 @@ import { createRipple, magneticEffect } from '@/lib/microInteractions';
 // import { useTheme3D } from '@/contexts/Theme3DContext'; //Removed import
 import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'wouter';
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -84,7 +85,7 @@ const Navbar: React.FC = () => {
           </motion.a>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center space-x-4">
             <div className="bg-black/20 backdrop-blur-sm rounded-full border border-accent/10 p-1">
               {navLinks.map((link, index) => (
                 <motion.a 
@@ -122,6 +123,22 @@ const Navbar: React.FC = () => {
                 </motion.a>
               ))}
             </div>
+            
+            {/* AI Chat Link */}
+            <Link href="/ai-chat">
+              <motion.div 
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white font-semibold text-sm ripple-container cursor-pointer"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(60, 60, 255, 0.5)"
+                }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => createRipple(e)}
+              >
+                <i className="fas fa-robot mr-2"></i>
+                AI Chat
+              </motion.div>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -190,11 +207,45 @@ const Navbar: React.FC = () => {
               </div>
 
 
+              {/* AI Chat Link for Mobile */}
+              <motion.div
+                className="pt-3 w-full max-w-md mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: navLinks.length * 0.1 + 0.1 }}
+              >
+                <Link href="/ai-chat">
+                  <motion.div 
+                    className="neon-border glass-card rounded-lg my-3 py-4 px-6 flex items-center justify-between w-full ripple-container text-white bg-gradient-to-r from-blue-600 to-purple-600"
+                    onClick={(e) => {
+                      createRipple(e);
+                      setMobileMenuOpen(false);
+                    }}
+                    whileHover={{ 
+                      scale: 1.03,
+                      boxShadow: "0 0 15px rgba(60, 60, 255, 0.5)",
+                      x: 5
+                    }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <span className="text-xl">AI Chat</span>
+                    <motion.div
+                      whileHover={{
+                        x: [0, 5, 0],
+                        transition: { duration: 0.5, repeat: Infinity }
+                      }}
+                    >
+                      <i className="fas fa-robot text-white"></i>
+                    </motion.div>
+                  </motion.div>
+                </Link>
+              </motion.div>
+
               <motion.div
                 className="pt-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: navLinks.length * 0.1 }}
+                transition={{ delay: navLinks.length * 0.1 + 0.2 }}
               >
                 <motion.button 
                   className="modern-button bg-accent/80 text-white px-8 py-3 rounded-full border border-accent/50 ripple-container push-button"

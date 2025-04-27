@@ -99,6 +99,19 @@ const HeroSection: React.FC = () => {
     };
   }, []);
   
+  // For direct toggle without dialog, uncomment this line
+  const handleToggle3D = () => {
+    if (enable3D) {
+      // If 3D is already enabled, just turn it off
+      toggleEnable3D();
+    } else {
+      // If 3D is disabled, show confirmation
+      if (window.confirm('Enable 3D effects? This may affect performance on low-end devices.')) {
+        toggleEnable3D();
+      }
+    }
+  };
+
   // Show performance notification toast
   useEffect(() => {
     // Show a performance toast notification after a delay
@@ -194,7 +207,7 @@ const HeroSection: React.FC = () => {
       {/* 3D Spline background */}
       {enable3D && (
         <div className="absolute inset-0 z-[1]">
-          <spline-viewer url="https://prod.spline.design/e4b6AHV8wQXG-1Wr/scene.splinecode"></spline-viewer>
+          <spline-viewer url="https://prod.spline.design/qPE6oRVlTRz9CSJW/scene.splinecode"></spline-viewer>
         </div>
       )}
       
@@ -539,15 +552,7 @@ const HeroSection: React.FC = () => {
         >
           <motion.button 
             className="relative group"
-            onClick={() => {
-              if (enable3D) {
-                // If 3D is already enabled, just toggle it off
-                toggleEnable3D();
-              } else {
-                // If 3D is disabled, open confirmation dialog
-                setConfirmDialogOpen(true);
-              }
-            }}
+            onClick={handleToggle3D}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             title={enable3D ? "Turn off 3D background" : "Turn on 3D background"}

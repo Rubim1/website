@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import AIChat from "@/pages/AIChat";
 import { AppProvider } from "@/contexts/AppContext";
 import { Theme3DProvider } from "@/contexts/Theme3DContext";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -17,6 +18,7 @@ function Router() {
   return (
     <Switch>
       <Route path={`${BASE_URL}/`} component={Home} />
+      <Route path={`${BASE_URL}/ai-chat`} component={AIChat} />
       <Route path={`${BASE_URL}/*`} component={NotFound} />
     </Switch>
   );

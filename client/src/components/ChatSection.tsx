@@ -13,11 +13,20 @@ interface ChatMessage {
   timestamp: Date;
   // Add a new field to mark messages for deletion
   isDeleted?: boolean;
+  // Add new field for typing indicator
+  isTyping?: boolean;
 }
 
 interface UserProfile {
   name: string;
   photoUrl: string;
+}
+
+// Users currently typing
+interface TypingUser {
+  name: string;
+  photoUrl: string;
+  timestamp: Date;
 }
 
 const ChatSection: React.FC = () => {
@@ -29,37 +38,74 @@ const ChatSection: React.FC = () => {
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [showChatSection, setShowChatSection] = useState(false); // Kontrol visibility chat section dan chat login
+  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load user profile from cookies and message from local storage on mount
+  // Function to fetch messages from the database
+  const fetchMessagesFromDatabase = async () => {
+    try {
+      const response = await fetch('/api/chat/messages');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      // Ensure dates are properly converted to Date objects
+      const messagesWithDateObjects = data.map((msg: any) => ({
+        ...msg,
+        id: msg.externalId, // Map database externalId to id used in the UI
+        timestamp: new Date(msg.timestamp)
+      }));
+      
+      // Sort messages by timestamp
+      const sortedMessages = messagesWithDateObjects.sort(
+        (a: ChatMessage, b: ChatMessage) => a.timestamp.getTime() - b.timestamp.getTime()
+      );
+      
+      console.log(`Loaded ${sortedMessages.length} messages from database`);
+      setMessages(sortedMessages);
+    } catch (error) {
+      console.error('Error fetching messages from database:', error);
+      
+      // Fallback to local storage if database fetch fails
+      const savedMessages = localStorage.getItem('chat_messages');
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Ensure dates are properly converted back to Date objects
+          const messagesWithDateObjects = parsedMessages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+          // Only keep the last 50 messages to prevent performance issues
+          setMessages(messagesWithDateObjects.slice(-50));
+        } catch (error) {
+          console.error('Error parsing saved messages:', error);
+        }
+      }
+    }
+  };
+
+  // Load user profile from cookies and messages from database on mount
   useEffect(() => {
     const savedName = getCookie('chat_name');
     const savedPhoto = getCookie('chat_photo');
-    const savedMessages = localStorage.getItem('chat_messages');
     
-    // Load saved messages if any
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages);
-        // Ensure dates are properly converted back to Date objects
-        const messagesWithDateObjects = parsedMessages.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }));
-        setMessages(messagesWithDateObjects);
-      } catch (error) {
-        console.error('Error parsing saved messages:', error);
-      }
-    }
-    
+    // Load saved profile information
     if (savedName) setProfileName(savedName);
     if (savedPhoto) setPhotoBase64(savedPhoto);
     
     if (savedName && savedPhoto) {
       setUserProfile({ name: savedName, photoUrl: savedPhoto });
     }
+    
+    // Fetch messages from database
+    fetchMessagesFromDatabase();
     // Don't automatically show profile modal - user needs to click the button now
   }, []);
 
@@ -67,8 +113,24 @@ const ChatSection: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
     
-    // Save messages to localStorage for persistence
-    localStorage.setItem('chat_messages', JSON.stringify(messages));
+    try {
+      // Save only last 20 messages to localStorage to prevent "QuotaExceededError"
+      const lastMessages = messages.slice(-20);
+      localStorage.setItem('chat_messages', JSON.stringify(lastMessages));
+    } catch (error) {
+      console.error('Error saving messages to localStorage:', error);
+      // If we encounter a quota error, clear localStorage and try again with fewer messages
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        localStorage.clear();
+        try {
+          // Try with just 5 messages as a fallback
+          const lastFewMessages = messages.slice(-5);
+          localStorage.setItem('chat_messages', JSON.stringify(lastFewMessages));
+        } catch (e) {
+          console.error('Failed to save even with reduced message count:', e);
+        }
+      }
+    }
   }, [messages]);
 
   // Handle WebSocket connection
@@ -103,14 +165,72 @@ const ChatSection: React.FC = () => {
 
     socket.addEventListener('message', (event) => {
       try {
-        const message = JSON.parse(event.data);
-        setMessages(prev => [...prev, {
-          id: message.id, 
-          name: message.name, 
-          photoUrl: message.photoUrl, 
-          text: message.text, 
-          timestamp: new Date(message.timestamp)
-        }]);
+        const data = JSON.parse(event.data);
+        console.log('Received WebSocket message:', data);
+        
+        // Handle different message types
+        if (data.type === 'typing') {
+          // Handle typing indicator
+          const typingUser = {
+            name: data.name,
+            photoUrl: data.photoUrl,
+            timestamp: new Date(data.timestamp)
+          };
+          
+          // Add to typing users if not already there
+          setTypingUsers(prevUsers => {
+            const existingUserIndex = prevUsers.findIndex(user => user.name === typingUser.name);
+            if (existingUserIndex >= 0) {
+              // Update existing user's timestamp
+              const newUsers = [...prevUsers];
+              newUsers[existingUserIndex] = typingUser;
+              return newUsers;
+            } else {
+              // Add new typing user
+              return [...prevUsers, typingUser];
+            }
+          });
+          
+          // Remove typing indicator after a delay (3 seconds)
+          setTimeout(() => {
+            setTypingUsers(prevUsers => prevUsers.filter(user => user.name !== typingUser.name));
+          }, 3000);
+          
+        } else if (data.type === 'stopTyping') {
+          // Remove user from typing list immediately
+          setTypingUsers(prevUsers => prevUsers.filter(user => user.name !== data.name));
+          
+        } else {
+          // Regular chat message
+          const messageData = {
+            id: data.id, 
+            name: data.name, 
+            photoUrl: data.photoUrl, 
+            text: data.text, 
+            timestamp: new Date(data.timestamp)
+          };
+          
+          // Check if we already have this message (by ID) to prevent duplicates
+          if (!messages.some(msg => msg.id === data.id)) {
+            console.log('Adding received message:', data.text, 'from', data.name);
+            
+            // Special handling for System messages
+            if (data.name === 'System') {
+              setMessages(prev => [...prev, messageData]);
+            }
+            // Handle messages from other users
+            else if (data.name !== userProfile.name) {
+              setMessages(prev => [...prev, messageData]);
+            } 
+            // Handle confirmation of our own messages (optional)
+            else {
+              console.log('Received confirmation of own message:', data.text);
+              // We don't need to add our own messages again as we've already added them optimistically
+            }
+          } else {
+            console.log('Duplicate message detected, ignoring:', data.id);
+          }
+        }
       } catch (error) {
         console.error('Error parsing message:', error);
       }
@@ -136,6 +256,7 @@ const ChatSection: React.FC = () => {
 
     const message = {
       id: generateId(),
+      type: 'message',
       name: userProfile.name,
       photoUrl: userProfile.photoUrl,
       text: newMessage,
@@ -145,18 +266,96 @@ const ChatSection: React.FC = () => {
     // Send message through WebSocket
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
+      
+      // Also send stopTyping event when a message is sent
+      const stopTypingData = {
+        type: 'stopTyping',
+        name: userProfile.name
+      };
+      setTimeout(() => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify(stopTypingData));
+        }
+      }, 100);
     }
 
     // Add message to local state (optimistic update)
     setMessages(prev => [...prev, message]);
     setNewMessage('');
+    
+    // Clear any existing typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
   };
 
+  // Last time typing indicator was sent
+  const lastTypingSentRef = useRef<number>(0);
+
+  // Handle typing indicator with throttling
+  const sendTypingIndicator = () => {
+    if (!userProfile.name || !isWebSocketConnected) return;
+    
+    const now = Date.now();
+    
+    // Clear any existing typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Only send typing indicator every 1000ms to prevent flooding
+    if (now - lastTypingSentRef.current > 1000) {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const typingData = {
+          type: 'typing',
+          name: userProfile.name,
+          photoUrl: userProfile.photoUrl,
+          timestamp: new Date()
+        };
+        wsRef.current.send(JSON.stringify(typingData));
+        lastTypingSentRef.current = now;
+      }
+    }
+    
+    // Set timeout to send stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const stopTypingData = {
+          type: 'stopTyping',
+          name: userProfile.name
+        };
+        wsRef.current.send(JSON.stringify(stopTypingData));
+      }
+    }, 2000);
+  };
+  
+  // Handle input changes including typing indicator
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+    
+    // Only send typing indicator if there's actual content
+    if (value.trim().length > 0) {
+      sendTypingIndicator();
+    }
+  };
+  
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    } else {
+      // This is a safeguard to ensure typing indicator is sent
+      // even if onChange wasn't triggered for some reason
+      sendTypingIndicator();
     }
+  };
+  
+  // Add emoji to the message
+  const handleEmojiSelect = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
   };
 
   const handleProfileSubmit = () => {
@@ -190,7 +389,12 @@ const ChatSection: React.FC = () => {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    // Format as HH:MM AM/PM, consistent with the design
+    return new Date(date).toLocaleTimeString(undefined, { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    }).toLowerCase();
   };
 
   // Function to handle message deletion
@@ -271,7 +475,7 @@ const ChatSection: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="glass-card neon-border rounded-2xl overflow-hidden shadow-xl mb-6 relative"
+              className={`glass-card neon-border rounded-2xl overflow-hidden shadow-xl mb-6 relative ${!darkMode ? 'light-mode' : ''}`}
             >
               {/* Chat Header */}
               <div className="bg-accent/10 p-4 border-b border-accent/20 backdrop-blur-sm flex items-center justify-between">
@@ -307,90 +511,197 @@ const ChatSection: React.FC = () => {
               </div>
               
               {/* Messages Container */}
-              <div className="p-4 h-96 overflow-y-auto bg-black/40 backdrop-blur-md">
+              <div className="p-4 h-[450px] overflow-y-auto bg-gradient-to-b from-black/50 to-black/30 backdrop-blur-md scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <i className="fas fa-comments text-5xl mb-4 text-accent/40"></i>
                     <p>Belum ada pesan. Mulai percakapan!</p>
+                    <p className="text-sm text-gray-500 mt-2">Pesan yang dikirim akan terlihat oleh semua orang di chat</p>
                   </div>
                 ) : (
-                  messages.map((msg) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex mb-4 ${msg.name === userProfile.name ? 'justify-end' : 'justify-start'}`}
-                    >
-                      {msg.name !== userProfile.name && (
-                        <Avatar className="h-8 w-8 mr-2 mt-1 border border-accent/20">
-                          <img src={msg.photoUrl} alt={msg.name} />
-                        </Avatar>
-                      )}
-                      <div className={`max-w-[75%] ${msg.name === userProfile.name ? 'bg-accent/20' : 'bg-gray-800/60'} rounded-xl p-3 backdrop-blur-sm relative group`}>
+                  <div className="space-y-4">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.name === userProfile.name ? 'justify-end' : 'justify-start'} group`}
+                      >
                         {msg.name !== userProfile.name && (
-                          <div className="text-accent/90 text-xs font-medium mb-1">{msg.name}</div>
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10 mr-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
+                              <img src={msg.photoUrl} alt={msg.name} className="object-cover" />
+                            </Avatar>
+                          </div>
                         )}
                         
-                        <p className="text-white break-words">{msg.text}</p>
-                        
-                        <div className={`text-gray-400 text-xs mt-1 ${msg.name === userProfile.name ? 'text-right' : 'text-left'}`}>
-                          {formatTime(msg.timestamp)}
+                        <div 
+                          className={`
+                            relative max-w-[85%] md:max-w-[75%] p-3 rounded-2xl backdrop-blur-sm shadow-md
+                            ${msg.name === userProfile.name 
+                              ? 'bg-gradient-to-br from-accent/30 to-accent/10 text-white rounded-tr-none border border-accent/10' 
+                              : 'bg-gradient-to-br from-gray-800/70 to-gray-800/40 text-white rounded-tl-none border border-gray-700/20'
+                            }
+                          `}
+                        >
+                          {msg.name !== userProfile.name && (
+                            <div className="text-accent/90 text-sm font-medium mb-1">{msg.name}</div>
+                          )}
+                          
+                          <p className="text-white break-words">{msg.text}</p>
+                          
+                          {/* Timestamp */}
+                          <div className={`text-gray-400 text-xs mt-1 ${msg.name === userProfile.name ? 'text-right' : 'text-left'} opacity-70`}>
+                            {formatTime(msg.timestamp)}
+                          </div>
+                          
+                          {/* Message status for own messages */}
+                          {msg.name === userProfile.name && (
+                            <div className="absolute -bottom-4 right-2 text-accent/80 text-xs flex items-center">
+                              <i className="fas fa-check-double mr-1 text-[10px]"></i>
+                              <span className="text-[10px]">Terkirim</span>
+                            </div>
+                          )}
+                          
+                          {/* Delete button - only for own messages */}
+                          {msg.name === userProfile.name && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-600/80 hover:bg-red-500 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md"
+                                    variant="destructive"
+                                    size="sm"
+                                  >
+                                    <i className="fas fa-times text-xs"></i>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Hapus pesan</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
                         
-                        {/* Delete button - only for own messages */}
                         {msg.name === userProfile.name && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => handleDeleteMessage(msg.id)}
-                                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-600/80 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                  variant="destructive"
-                                  size="sm"
-                                >
-                                  <i className="fas fa-times text-xs"></i>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs">Hapus pesan</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10 ml-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
+                              <img src={msg.photoUrl} alt={msg.name} className="object-cover" />
+                            </Avatar>
+                          </div>
                         )}
                       </div>
-                      
-                      {msg.name === userProfile.name && (
-                        <Avatar className="h-8 w-8 ml-2 mt-1 border border-accent/20">
-                          <img src={msg.photoUrl} alt={msg.name} />
-                        </Avatar>
-                      )}
-                    </motion.div>
-                  ))
+                    ))}
+                  </div>
                 )}
-                <div ref={messagesEndRef} />
+                {/* This div is used to scroll into view when new messages arrive */}
+                <div ref={messagesEndRef} className="h-1" />
               </div>
+              
+              {/* Typing Indicator */}
+              {typingUsers.length > 0 && (
+                <div className="px-4 py-2 bg-black/20 border-t border-accent/10">
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <div className="flex -space-x-2 mr-2">
+                      {typingUsers.slice(0, 3).map((user, index) => (
+                        <Avatar key={user.name} className="h-6 w-6 border border-accent/20">
+                          <img src={user.photoUrl} alt={user.name} className="object-cover" />
+                        </Avatar>
+                      ))}
+                    </div>
+                    <div className="flex items-center">
+                      <span className="mr-2">
+                        {typingUsers.length === 1 
+                          ? typingUsers[0].name 
+                          : `${typingUsers.length} orang`} sedang mengetik
+                      </span>
+                      <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-pulse delay-100"></div>
+                        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-pulse delay-200"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {/* Input Area */}
               <div className="p-4 border-t border-accent/20 bg-black/60 backdrop-blur-md">
                 {userProfile.name ? (
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Ketik pesan..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={handleKeyPress}
-                      className="flex-1 bg-black/40 border-accent/30 focus:border-accent/60 text-white"
-                    />
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={!isWebSocketConnected}
-                        className="bg-accent hover:bg-accent/80 text-white"
-                      >
-                        <i className="fas fa-paper-plane mr-2"></i>
-                        Kirim
-                      </Button>
-                    </motion.div>
+                  <div className="relative">
+                    {/* Message Input with Emoji Button */}
+                    <div className="flex space-x-2">
+                      <div className="flex items-center flex-1 bg-black/40 rounded-md border border-accent/30 focus-within:border-accent/60 overflow-hidden">
+                        <div className="relative flex-1 flex items-center">
+                          <Input
+                            placeholder="Ketik pesan..."
+                            value={newMessage}
+                            onChange={handleInputChange}
+                            onKeyDown={handleKeyPress}
+                            className="flex-1 border-0 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                          />
+                          <div className="flex items-center mr-2">
+                            <Button 
+                              type="button"
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-transparent"
+                            >
+                              <i className="fas fa-smile text-lg"></i>
+                            </Button>
+                            <Button 
+                              type="button"
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setDarkMode(!darkMode)}
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-transparent"
+                            >
+                              <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'} text-lg`}></i>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          onClick={handleSendMessage}
+                          disabled={!isWebSocketConnected || !newMessage.trim()}
+                          className="bg-accent hover:bg-accent/80 text-white px-4"
+                        >
+                          <i className="fas fa-paper-plane"></i>
+                        </Button>
+                      </motion.div>
+                    </div>
+                    
+                    {/* Emoji Picker Popup */}
+                    {showEmojiPicker && (
+                      <div className="absolute bottom-full right-0 mb-2 p-3 bg-gray-900/95 backdrop-blur-md rounded-lg border border-accent/20 shadow-xl z-10">
+                        <div className="grid grid-cols-8 gap-2 max-h-60 overflow-y-auto">
+                          {['😀', '😂', '😊', '😍', '🥰', '😘', '😎', '🤔', 
+                            '😢', '😭', '😡', '🥺', '😴', '🤑', '🤩', '😇',
+                            '👍', '👎', '🎉', '❤️', '🔥', '⭐', '🌟', '✨',
+                            '💯', '🙏', '👀', '🤗', '🤝', '🤫', '🤐', '😱'].map(emoji => (
+                            <Button
+                              key={emoji}
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-accent/10"
+                              onClick={() => handleEmojiSelect(emoji)}
+                            >
+                              {emoji}
+                            </Button>
+                          ))}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full mt-2 text-xs text-gray-400 hover:text-white"
+                          onClick={() => setShowEmojiPicker(false)}
+                        >
+                          Tutup
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-2">
