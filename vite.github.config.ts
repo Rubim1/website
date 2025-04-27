@@ -17,8 +17,8 @@ export default defineConfig({
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
-  // This should match your GitHub repository name
-  base: "/website/",
+  // This should match your GitHub repository name or be empty for user sites
+  base: "/",
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,

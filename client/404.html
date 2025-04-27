@@ -11,9 +11,9 @@
     // string into just a query string, and then redirects the browser
     // to the new url with only a query string and hash fragment
 
-    // This is for GitHub Pages - keep pathSegmentsToKeep as 1 for repo sites
-    // (like https://username.github.io/repo-name/)
-    var pathSegmentsToKeep = 1;
+    // This is for GitHub Pages - keep pathSegmentsToKeep as 0 for user sites
+    // (like https://username.github.io/)
+    var pathSegmentsToKeep = 0;
 
     var l = window.location;
     l.replace(

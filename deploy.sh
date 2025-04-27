@@ -3,8 +3,8 @@
 # Simple GitHub Pages deployment script - no setup required
 # Just run: bash deploy.sh
 
-echo "📦 Installing gh-pages package if needed..."
-npm install -g gh-pages
+echo "📦 Installing gh-pages package locally..."
+npm install gh-pages --save-dev
 
 echo "🔨 Building site for GitHub Pages..."
 npx vite build --config vite.github.config.ts
@@ -14,7 +14,7 @@ touch dist/.nojekyll
 cp client/404.html dist/
 
 echo "🚀 Deploying to GitHub Pages..."
-gh-pages -d dist
+npx gh-pages -d dist
 
 echo "✅ Deployment complete! Your site should be available at https://rubim1.github.io/website/"
 echo "⏳ Note: It might take a few minutes for GitHub to update the site."
