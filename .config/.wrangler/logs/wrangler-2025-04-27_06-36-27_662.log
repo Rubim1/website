@@ -1,0 +1,27 @@
+
+--- 2025-04-27T06:36:27.767Z debug
+🪵  Writing logs to "/home/runner/workspace/.config/.wrangler/logs/wrangler-2025-04-27_06-36-27_662.log"
+---
+
+--- 2025-04-27T06:36:27.767Z debug
+Metrics dispatcher: Posting data {"deviceId":"0bd9d29f-b422-4569-8b81-046c9808773b","event":"wrangler command started","timestamp":1745735787767,"properties":{"amplitude_session_id":1745735787764,"amplitude_event_id":0,"wranglerVersion":"4.13.2","osPlatform":"Linux","osVersion":"#1-NixOS SMP PREEMPT_DYNAMIC Tue Jan  1 00:00:00 UTC 1980","nodeVersion":20,"isFirstUsage":true,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"argsUsed":[],"argsCombination":"","command":"wrangler login","args":{"xJsonConfig":true,"j":true,"browser":true,"callbackHost":"<REDACTED>","callbackPort":8976}}}
+---
+
+--- 2025-04-27T06:36:27.777Z debug
+.env file not found at ".env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2025-04-27T06:36:28.942Z log
+
+ ⛅️ wrangler 4.13.2
+[38;2;255;136;0m-------------------[39m
+
+---
+
+--- 2025-04-27T06:36:28.949Z log
+Attempting to login via OAuth...
+---
+
+--- 2025-04-27T06:36:28.953Z log
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20offline_access&state=w5o0SSL19W8LimvFzU9c3h7T-s.cg9hz&code_challenge=0mR7YgQOMurTgEYRV45ef1f4-Qj7zBFMw_odh5Oxv7s&code_challenge_method=S256
+---

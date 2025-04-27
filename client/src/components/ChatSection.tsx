@@ -50,23 +50,28 @@ const ChatSection: React.FC = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Check if we're running on GitHub Pages or in a static environment
+  // Check if we're running on GitHub Pages, Cloudflare Pages, or in a static environment
   useEffect(() => {
-    // Check for GitHub Pages hostname OR a path that indicates GitHub Pages deployment
-    const isOnGitHubPages = 
+    // Check for static deployment environments
+    const isOnStaticHost = 
+      // GitHub Pages indicators
       window.location.hostname.includes('github.io') || 
       window.location.pathname.includes('/website/') ||
-      window.location.href.includes('github.io');
+      window.location.href.includes('github.io') ||
+      // Cloudflare Pages indicators
+      window.location.hostname.includes('pages.dev') ||
+      // Environment variable
+      (typeof window.__IS_CLOUDFLARE_DEPLOYMENT__ !== 'undefined' && window.__IS_CLOUDFLARE_DEPLOYMENT__ === true);
     
-    console.log('Checking for GitHub Pages:', {
+    console.log('Checking for static deployment:', {
       hostname: window.location.hostname,
       pathname: window.location.pathname,
-      isOnGitHubPages
+      isOnStaticHost
     });
     
-    setIsGitHubPages(isOnGitHubPages);
+    setIsGitHubPages(isOnStaticHost); // We're reusing the same state variable for all static environments
     
-    if (isOnGitHubPages) {
+    if (isOnStaticHost) {
       toast({
         title: "Firebase Realtime Mode",
         description: "Running with Firebase Realtime Database for chat synchronization.",
