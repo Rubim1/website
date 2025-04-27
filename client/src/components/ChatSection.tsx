@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Avatar } from './ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessage {
   id: string;
@@ -30,6 +31,7 @@ interface TypingUser {
 }
 
 const ChatSection: React.FC = () => {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: '', photoUrl: '' });
@@ -41,13 +43,64 @@ const ChatSection: React.FC = () => {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [isGitHubPages, setIsGitHubPages] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Check if we're running on GitHub Pages or in a static environment
+  useEffect(() => {
+    // Check for GitHub Pages hostname OR a path that indicates GitHub Pages deployment
+    const isOnGitHubPages = 
+      window.location.hostname.includes('github.io') || 
+      window.location.pathname.includes('/website/') ||
+      window.location.href.includes('github.io');
+    
+    console.log('Checking for GitHub Pages:', {
+      hostname: window.location.hostname,
+      pathname: window.location.pathname,
+      isOnGitHubPages
+    });
+    
+    setIsGitHubPages(isOnGitHubPages);
+    
+    if (isOnGitHubPages) {
+      toast({
+        title: "GitHub Pages Mode",
+        description: "Running in static mode. WebSocket chat functionality is limited.",
+        duration: 5000,
+      });
+      
+      // Force WebSocket connected state to true for GitHub Pages
+      setIsWebSocketConnected(true);
+    }
+  }, []);
 
   // Function to fetch messages from the database
   const fetchMessagesFromDatabase = async () => {
+    // If we're on GitHub Pages, just use localStorage and don't try to fetch from API
+    if (isGitHubPages) {
+      console.log('Running on GitHub Pages - Using local storage for messages');
+      const savedMessages = localStorage.getItem('chat_messages');
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Ensure dates are properly converted back to Date objects
+          const messagesWithDateObjects = parsedMessages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+          // Only keep the last 50 messages to prevent performance issues
+          setMessages(messagesWithDateObjects.slice(-50));
+        } catch (error) {
+          console.error('Error parsing saved messages:', error);
+        }
+      }
+      return;
+    }
+    
+    // Regular API fetch for non-GitHub Pages environments
     try {
       const response = await fetch('/api/chat/messages');
       if (!response.ok) {
@@ -151,6 +204,30 @@ const ChatSection: React.FC = () => {
   };
 
   const connectWebSocket = () => {
+    // If we're on GitHub Pages, don't try to connect to WebSocket
+    if (isGitHubPages) {
+      console.log('Running on GitHub Pages - WebSocket connection is not supported');
+      // Set a fake WebSocket connected state so the UI doesn't show "Connecting..."
+      setIsWebSocketConnected(true);
+      
+      // Add a simulated welcome message
+      const welcomeMessage = {
+        id: `github-pages-welcome-${Date.now()}`,
+        name: "System",
+        photoUrl: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwYjhmZiIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4LTggOCAzLjU5IDggOC0zLjU5IDgtOCA4eiIvPjxwYXRoIGZpbGw9IiMwMGI4ZmYiIGQ9Ik0xMiA2Yy0zLjMxIDAtNiAyLjY5LTYgNnMyLjY5IDYgNiA2IDYtMi42OSA2LTYtMi42OS02LTYtNnptMCAxMGMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9zdmc+",
+        text: "GitHub Pages mode active. This is a limited version of the chat app. Messages will only be saved locally.",
+        timestamp: new Date()
+      };
+      
+      // Only add if we don't have it already
+      if (!messages.some(msg => msg.text.includes("GitHub Pages mode active"))) {
+        setMessages(prev => [...prev, welcomeMessage]);
+      }
+      
+      return;
+    }
+    
+    // Normal WebSocket connection for non-GitHub Pages environments
     // Determine the correct protocol (ws or wss) based on whether the page is loaded over HTTP or HTTPS
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -263,7 +340,15 @@ const ChatSection: React.FC = () => {
       timestamp: new Date()
     };
 
-    // Send message through WebSocket
+    // If on GitHub Pages, just save locally
+    if (isGitHubPages) {
+      // Just add message to local state since we can't use WebSockets
+      setMessages(prev => [...prev, message]);
+      setNewMessage('');
+      return;
+    }
+
+    // Send message through WebSocket for non-GitHub Pages environment
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
       
@@ -295,6 +380,9 @@ const ChatSection: React.FC = () => {
 
   // Handle typing indicator with throttling
   const sendTypingIndicator = () => {
+    // Skip for GitHub Pages since WebSockets don't work there
+    if (isGitHubPages) return;
+    
     if (!userProfile.name || !isWebSocketConnected) return;
     
     const now = Date.now();
@@ -482,7 +570,7 @@ const ChatSection: React.FC = () => {
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-accent animate-pulse mr-2"></div>
                   <h3 className="text-white font-medium">
-                    Chat Kelas {isWebSocketConnected ? 'Online' : 'Menghubungkan...'}
+                    Chat Kelas {isGitHubPages ? 'Mode Statis' : (isWebSocketConnected ? 'Online' : 'Menghubungkan...')}
                   </h3>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -665,7 +753,7 @@ const ChatSection: React.FC = () => {
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={handleSendMessage}
-                          disabled={!isWebSocketConnected || !newMessage.trim()}
+                          disabled={(isGitHubPages ? false : !isWebSocketConnected) || !newMessage.trim()}
                           className="bg-accent hover:bg-accent/80 text-white px-4"
                         >
                           <i className="fas fa-paper-plane"></i>
