@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import * as ReactDOM from 'react-dom/client';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme3D } from '@/contexts/Theme3DContext';
@@ -99,35 +100,49 @@ const HeroSection: React.FC = () => {
     };
   }, []);
   
-  // For direct toggle without dialog, uncomment this line
+  // Handle 3D toggle with custom dialog
   const handleToggle3D = () => {
     if (enable3D) {
       // If 3D is already enabled, just turn it off
       toggleEnable3D();
+      
+      // Show toast notification when 3D is disabled
+      toast({
+        title: "3D Effects Disabled",
+        description: (
+          <div className="flex items-start space-x-2">
+            <i className="fas fa-cube mt-0.5 text-gray-400"></i>
+            <span>3D effects have been turned off. You can enable them again at any time.</span>
+          </div>
+        ),
+        duration: 3000,
+      });
     } else {
-      // If 3D is disabled, show confirmation
-      if (window.confirm('Enable 3D effects? This may affect performance on low-end devices.')) {
-        toggleEnable3D();
-      }
+      // If 3D is disabled, show custom dialog
+      setConfirmDialogOpen(true);
     }
   };
 
-  // Show performance notification toast
+  // Show performance notification toast for all devices
   useEffect(() => {
     // Show a performance toast notification after a delay
     const timeoutId = setTimeout(() => {
-      if (!isMobileDevice) {
-        toast({
-          title: "3D Effects Available",
-          description: (
-            <div className="flex items-start space-x-2">
-              <i className="fas fa-cube mt-0.5 text-primary"></i>
-              <span>Enable 3D effects for a more immersive experience. Use the toggle in the bottom left corner. May affect performance on low-end devices.</span>
-            </div>
-          ),
-          duration: 8000,
-        });
-      }
+      // Different messages for mobile vs desktop
+      const title = isMobileDevice ? "3D Effects Now Available on Mobile" : "3D Effects Available";
+      const description = isMobileDevice 
+        ? "You can now toggle 3D effects on your mobile device using the button in the bottom left corner. Note that it may use more battery and run slower."
+        : "Enable 3D effects for a more immersive experience. Use the toggle in the bottom left corner. May affect performance on low-end devices.";
+      
+      toast({
+        title: title,
+        description: (
+          <div className="flex items-start space-x-2">
+            <i className="fas fa-cube mt-0.5 text-primary"></i>
+            <span>{description}</span>
+          </div>
+        ),
+        duration: 8000,
+      });
     }, 5000);
     
     return () => clearTimeout(timeoutId);
@@ -151,49 +166,124 @@ const HeroSection: React.FC = () => {
     <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24">
       {/* Custom 3D Activation Confirmation Dialog */}
       {confirmDialogOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-[100]">
-          <div 
+        <motion.div 
+          className="fixed inset-0 flex items-center justify-center z-[100]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          <motion.div 
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setConfirmDialogOpen(false)}
-          ></div>
-          <div className="relative bg-black/90 backdrop-blur-lg border border-primary/30 rounded-lg w-full max-w-md mx-4 p-6 z-[101] shadow-xl">
-            <div className="flex items-center gap-2 mb-4">
-              <i className="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
-              <h3 className="text-white text-xl font-medium">Enable 3D Effects?</h3>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          ></motion.div>
+          
+          <motion.div 
+            className="relative bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl border border-[#00b8ff]/30 rounded-xl w-full max-w-md mx-4 p-6 z-[101] shadow-[0_0_25px_rgba(0,184,255,0.2)]"
+            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            {/* Dialog header with animated icon */}
+            <div className="flex items-center gap-3 mb-5 border-b border-gray-700/50 pb-4">
+              <motion.div
+                className="relative w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#00b8ff]/20 to-[#00b8ff]/5"
+                animate={{ 
+                  boxShadow: [
+                    '0 0 0 rgba(0, 184, 255, 0.3)', 
+                    '0 0 15px rgba(0, 184, 255, 0.5)', 
+                    '0 0 0 rgba(0, 184, 255, 0.3)'
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <motion.i 
+                  className="fas fa-cube text-[#00b8ff] text-xl"
+                  animate={{ 
+                    rotateY: [0, 180, 360],
+                    scale: [1, 1.1, 1] 
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                ></motion.i>
+              </motion.div>
+              <h3 className="text-white text-xl font-medium">
+                <span className="text-[#00b8ff]">3D</span> Mode
+                <span className="block text-sm font-normal text-gray-400 mt-1">Enhanced visual experience</span>
+              </h3>
             </div>
             
-            <div className="text-gray-300 mb-6">
-              <p className="mb-3">
-                3D effects can provide a more immersive experience but may affect performance on low-end devices.
-              </p>
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-md p-3 text-yellow-300 text-sm">
-                <p className="flex items-start">
-                  <i className="fas fa-lightbulb mt-1 mr-2"></i>
-                  <span>If you experience lag or slow performance, you can disable 3D effects by clicking the same button again.</span>
-                </p>
-              </div>
+            {/* Dialog content - mobile specific */}
+            <div className="text-gray-300 mb-6 space-y-4">
+              <motion.div 
+                className="flex items-start gap-3"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="mt-1 text-[#00b8ff]"><i className="fas fa-sparkles"></i></div>
+                <div>
+                  <h4 className="font-medium text-white">Immersive Experience</h4>
+                  <p className="text-sm text-gray-400">Enjoy an interactive 3D background for a more engaging visual experience</p>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="flex items-start gap-3"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="mt-1 text-yellow-400"><i className="fas fa-battery-half"></i></div>
+                <div>
+                  <h4 className="font-medium text-white">Battery Usage</h4>
+                  <p className="text-sm text-gray-400">3D mode uses more resources and may affect battery life on mobile devices</p>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="bg-gradient-to-r from-blue-900/20 to-blue-800/10 border border-[#00b8ff]/20 rounded-lg p-4 mt-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="flex items-start gap-2 text-[#00b8ff]">
+                  <i className="fas fa-lightbulb mt-1"></i>
+                  <p className="text-sm">
+                    You can toggle 3D mode off at any time by clicking the same button again
+                  </p>
+                </div>
+              </motion.div>
             </div>
             
+            {/* Dialog actions */}
             <div className="flex justify-end gap-3">
-              <button 
-                className="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white transition-colors"
+              <motion.button 
+                className="px-4 py-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/90 border border-gray-700/50 text-white transition-colors"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => setConfirmDialogOpen(false)}
               >
+                <i className="fas fa-times mr-2 opacity-70"></i>
                 Cancel
-              </button>
-              <button 
-                className="px-4 py-2 rounded-md bg-primary hover:bg-primary/80 text-white transition-colors"
+              </motion.button>
+              
+              <motion.button 
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#00b8ff] to-[#0090cc] hover:from-[#00a0e0] hover:to-[#0080b5] text-white shadow-lg shadow-[#00b8ff]/20 transition-all"
+                whileHover={{ scale: 1.03, boxShadow: '0 0 15px rgba(0, 184, 255, 0.4)' }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   toggleEnable3D();
                   setConfirmDialogOpen(false);
                 }}
               >
                 <i className="fas fa-cube mr-2"></i>
-                Enable 3D
-              </button>
+                Enable 3D Mode
+              </motion.button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
       {/* Background with parallax */}
       <div 
@@ -268,6 +358,29 @@ const HeroSection: React.FC = () => {
         >
           <div className="relative mb-6">
             {/* Ultra-premium title with layered effects */}
+            {/* Alternative 3D Toggle Button In Main Content */}
+            <motion.div
+              className="mb-4 flex justify-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+            >
+              <button
+                id="main-3d-toggle"
+                onClick={handleToggle3D}
+                className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                  enable3D 
+                    ? 'bg-gradient-to-r from-[#00b8ff] to-[#0090cc] text-white shadow-lg shadow-[#00b8ff]/20' 
+                    : 'bg-gray-800/60 backdrop-blur-sm text-gray-300 border border-gray-700/50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <i className={`fas ${enable3D ? 'fa-cube' : 'fa-cube'} ${enable3D ? 'text-white' : 'text-gray-400'}`}></i>
+                  <span className="font-medium">{enable3D ? 'Disable 3D Mode' : 'Enable 3D Mode'}</span>
+                </div>
+              </button>
+            </motion.div>
+            
             <motion.h1 
               className="text-6xl md:text-8xl font-bold relative inline-block"
               initial={{ opacity: 0, y: -30 }}
@@ -543,116 +656,224 @@ const HeroSection: React.FC = () => {
           </motion.div>
         </motion.div>
         
-        {/* 3D Toggle Button */}
+        {/* 3D Toggle Button - Specially enhanced for better mobile touch - MOVED LOWER */}
         <motion.div 
-          className="fixed bottom-6 left-6 z-50"
+          className="fixed bottom-6 left-6 z-50 select-none"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 2, duration: 0.5 }}
         >
-          <motion.button 
-            className="relative group"
+          {/* Use a div with onClick instead of a button for better mobile compatibility */}
+          <div 
+            role="button"
+            aria-label={enable3D ? "Turn off 3D background" : "Turn on 3D background"}
+            className="relative group touch-manipulation cursor-pointer"
             onClick={handleToggle3D}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            title={enable3D ? "Turn off 3D background" : "Turn on 3D background"}
-            disabled={isMobileDevice}
+            onTouchEnd={(e) => {
+              e.preventDefault(); // Prevent ghost clicks
+              handleToggle3D();
+            }}
+            style={{ touchAction: 'manipulation' }}
           >
-            {/* Button background */}
-            <div className={`relative w-14 h-14 rounded-full backdrop-blur-md p-[2px] ${isMobileDevice ? 'opacity-50 cursor-not-allowed' : ''} ${enable3D ? 'bg-gradient-to-br from-[#00b8ff]/80 to-[#80d8ff]/60' : 'bg-gradient-to-br from-gray-500/40 to-gray-600/30'}`}>
-              <div className="absolute inset-[1px] rounded-full bg-[#001520]/80 backdrop-blur-md" />
-              
-              {/* Icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <i className={`fas ${enable3D ? 'fa-cube' : 'fa-square'} ${enable3D ? 'text-[#00b8ff]' : 'text-gray-400'}`}></i>
-              </div>
-            </div>
-          </motion.button>
-        </motion.div>
-        
-        {/* Premium Music player toggle */}
-        <motion.div 
-          className="fixed bottom-6 right-6 z-50"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 2, duration: 0.5 }}
-        >
-          <motion.button 
-            className="relative group"
-            onClick={() => document.querySelector('.audio-player')?.classList.remove('minimized')}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            {/* Glowing background */}
+            {/* Extremely large invisible touch target especially for mobile */}
+            <div className="absolute -inset-16 md:-inset-8 cursor-pointer z-10"></div>
+            
+            {/* Button glow effect */}
             <motion.div 
-              className="absolute inset-0 rounded-full bg-[#00b8ff]/20 blur-xl"
+              className={`absolute inset-0 rounded-xl blur-md ${enable3D ? 'bg-[#00b8ff]/30' : 'bg-gray-400/10'}`}
               animate={{ 
-                scale: [0.85, 1.1, 0.85],
-                opacity: [0.4, 0.7, 0.4] 
+                scale: [0.85, 1.15, 0.85],
+                opacity: [0.4, 0.6, 0.4] 
               }}
-              transition={{ 
+              transition={{
                 duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
             />
             
-            {/* Ripple effects */}
+            {/* Button actual background */}
+            <div className={`relative w-14 h-14 rounded-xl shadow-lg backdrop-blur-md p-[2px] ${
+              enable3D 
+              ? 'bg-gradient-to-br from-[#00b8ff]/90 to-[#80d8ff]/70 shadow-[#00b8ff]/20' 
+              : 'bg-gradient-to-br from-gray-700/60 to-gray-800/50'
+            }`}>
+              <div className={`absolute inset-[1px] rounded-xl backdrop-blur-md flex items-center justify-center ${
+                enable3D ? 'bg-[#001520]/70' : 'bg-[#001520]/90'
+              }`}>
+                
+                {/* On/Off text indicator */}
+                <div className="absolute -bottom-7 text-center w-full">
+                  <span className={`text-xs font-semibold tracking-wide ${
+                    enable3D ? 'text-[#00b8ff]' : 'text-gray-500'
+                  }`}>
+                    {enable3D ? '3D ON' : '3D OFF'}
+                  </span>
+                </div>
+                
+                {/* Icon with animation */}
+                <motion.div
+                  animate={enable3D ? {
+                    rotateY: [0, 180, 360],
+                    scale: [1, 1.1, 1],
+                  } : {}}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="flex items-center justify-center"
+                >
+                  <i className={`fas ${enable3D ? 'fa-cube text-xl' : 'fa-cube text-lg'} ${
+                    enable3D ? 'text-[#00b8ff]' : 'text-gray-400'
+                  }`}></i>
+                </motion.div>
+              </div>
+            </div>
+            
+            {/* Pulse effect for when 3D is enabled */}
+            {enable3D && (
+              <motion.div
+                className="absolute -inset-2 rounded-full opacity-0 border-2 border-[#00b8ff]/30"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0, 0.5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeOut"
+                }}
+              />
+            )}
+          </div>
+        </motion.div>
+        
+        {/* Premium Music player toggle - Enhanced for mobile - MOVED LOWER */}
+        <motion.div 
+          className="fixed bottom-6 right-6 z-50 select-none"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 2, duration: 0.5 }}
+        >
+          <div 
+            role="button"
+            aria-label="Toggle Music Player"
+            className="relative group touch-manipulation cursor-pointer"
+            onClick={() => {
+              // Simple approach - just toggle the class on the audio player
+              const audioPlayer = document.querySelector('.audio-player');
+              if (audioPlayer) {
+                // If player has minimized class, remove it, otherwise add it
+                if (audioPlayer.classList.contains('minimized')) {
+                  audioPlayer.classList.remove('minimized');
+                  console.log("Music player expanded");
+                } else {
+                  audioPlayer.classList.add('minimized');
+                  console.log("Music player minimized");
+                }
+              } else {
+                console.log("Audio player not found in DOM");
+              }
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault(); // Prevent ghost clicks
+              // Toggle the music player
+              const audioPlayer = document.querySelector('.audio-player');
+              if (audioPlayer) {
+                if (audioPlayer.classList.contains('minimized')) {
+                  audioPlayer.classList.remove('minimized');
+                } else {
+                  audioPlayer.classList.add('minimized');
+                }
+              }
+            }}
+            style={{ touchAction: 'manipulation' }}
+          >
+            {/* Extremely large invisible touch target especially for mobile */}
+            <div className="absolute -inset-16 md:-inset-8 cursor-pointer z-10"></div>
+            
+            {/* Button glow effect */}
             <motion.div 
-              className="absolute inset-0 rounded-full border-2 border-[#00b8ff]/20"
+              className="absolute inset-0 rounded-xl blur-md bg-[#00b8ff]/30"
               animate={{ 
-                scale: [1, 1.4, 1.8, 1],
-                opacity: [0.5, 0.3, 0, 0.5]
+                scale: [0.85, 1.15, 0.85],
+                opacity: [0.4, 0.6, 0.4] 
               }}
-              transition={{ 
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            
+            {/* Button actual background */}
+            <div className="relative w-14 h-14 rounded-xl shadow-lg bg-gradient-to-br from-[#00b8ff]/90 to-[#80d8ff]/70 shadow-[#00b8ff]/20 backdrop-blur-md p-[2px]">
+              <div className="absolute inset-[1px] rounded-xl bg-[#001520]/70 backdrop-blur-md flex items-center justify-center">
+                
+                {/* On/Off text indicator */}
+                <div className="absolute -bottom-7 text-center w-full">
+                  <span className="text-xs font-semibold tracking-wide text-[#00b8ff]">MUSIC</span>
+                </div>
+                
+                {/* Icon with animation */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="flex items-center justify-center"
+                >
+                  <motion.i 
+                    className="fas fa-music text-xl text-[#00b8ff]"
+                    animate={{
+                      rotate: [0, 5, 0, -5, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </div>
+            
+            {/* Shine effect */}
+            <div className="absolute inset-0 rounded-xl overflow-hidden">
+              <motion.div
+                className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/30 to-transparent"
+                style={{ rotate: -30 }}
+                animate={{ 
+                  x: ['-100%', '100%'] 
+                }}
+                transition={{ 
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                  ease: "easeInOut"
+                }}
+              />
+            </div>
+            
+            {/* Pulse effect */}
+            <motion.div
+              className="absolute -inset-2 rounded-full opacity-0 border-2 border-[#00b8ff]/30"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0, 0.5, 0]
+              }}
+              transition={{
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeOut"
               }}
             />
-            
-            {/* Button background */}
-            <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[#00b8ff]/80 to-[#80d8ff]/60 backdrop-blur-md p-[2px]">
-              <div className="absolute inset-[1px] rounded-full bg-[#001520]/80 backdrop-blur-md" />
-              
-              {/* Icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.i 
-                  className="fas fa-music text-[#00b8ff]"
-                  animate={{ 
-                    scale: [1, 1.1, 1],
-                    textShadow: [
-                      '0 0 4px rgba(0, 184, 255, 0.6)',
-                      '0 0 8px rgba(0, 184, 255, 0.8)',
-                      '0 0 4px rgba(0, 184, 255, 0.6)'
-                    ]
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 rounded-full overflow-hidden">
-                <motion.div
-                  className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/30 to-transparent"
-                  style={{ rotate: -30 }}
-                  animate={{ 
-                    x: ['-100%', '100%'] 
-                  }}
-                  transition={{ 
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                    ease: "easeInOut"
-                  }}
-                />
-              </div>
-            </div>
-          </motion.button>
+          </div>
         </motion.div>
       </div>
       

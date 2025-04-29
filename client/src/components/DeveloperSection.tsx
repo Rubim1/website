@@ -25,18 +25,7 @@ const DeveloperSection: React.FC = () => {
     { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbymz' }
   ];
 
-  // Dev habits/likes with progress
-  const devSkills = [
-    { name: 'Malas-malasan', progress: 50 },
-    { name: 'Nonton Anime', progress: 72 },
-    { name: 'Baca Manga/Manwha/Manhua/Light Novel', progress: 84 },
-    { name: 'Gaming', progress: 88 },
-    { name: 'Tidur', progress: 40 },
-    { name: 'Experiment', progress: 61 },
-    { name: 'Belajar (kalo butuh)', progress: 85 },
-    { name: 'Researching', progress: 79 },
-    { name: 'Nonton/Scrolling YouTube/TikTok/Film/Instagram', progress: 80 }
-  ];
+
 
   // Typing effect
   useEffect(() => {
@@ -554,41 +543,7 @@ const DeveloperSection: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            {/* Skills Section */}
-            <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8 mb-8">
-              <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center">
-                <i className="fas fa-heart text-accent mr-3"></i>
-                <span>Kebiasaan/Kesukaan Dev</span>
-              </h3>
-              
-              <div className="space-y-6">
-                {devSkills.map((skill, index) => (
-                  <motion.div 
-                    key={skill.name}
-                    className="space-y-2"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 + (index * 0.1) }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-white">{skill.name}</span>
-                      <span className="text-accent">{skill.progress}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                      <motion.div 
-                        className="h-full bg-gradient-to-r from-accent/80 to-accent"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.progress}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.5 + (index * 0.1) }}
-                      ></motion.div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-            
+
             {/* 3D Canvas Animation Section */}
             <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8">
               <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center">

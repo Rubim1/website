@@ -6,6 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createRipple, magneticEffect } from '@/lib/microInteractions';
 
+// Extend Window interface to include our custom property
+declare global {
+  interface Window {
+    musicPlayerActive?: boolean;
+  }
+}
+
 // Helper functions to extract IDs from URLs
 const getYoutubeID = (url: string) => {
   // Handle different YouTube URL formats
@@ -54,7 +61,8 @@ const defaultSongs: Song[] = [
 ];
 
 const MusicPlayer: React.FC = () => {
-  const [minimized, setMinimized] = useState(false);
+  // Start minimized by default
+  const [minimized, setMinimized] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [songs, setSongs] = useState<Song[]>(defaultSongs);
@@ -69,12 +77,27 @@ const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load the first song by default
+  // Load the first song by default and ensure we only initialize once
   useEffect(() => {
+    // Mark this instance as the active player
+    window.musicPlayerActive = true;
+    
+    // Check if we already have a player instance to avoid duplicates
+    if (window.hasOwnProperty('musicPlayerActive') && window.musicPlayerActive !== true) {
+      console.log('Multiple music player instances detected - deactivating this one');
+      return;
+    }
+    
+    // Initialize player instance (only once)
     if (songs.length > 0 && !currentSong) {
       setCurrentSong(songs[0]);
     }
-  }, [songs, currentSong]);
+    
+    // Cleanup function for when component unmounts
+    return () => {
+      window.musicPlayerActive = false; 
+    };
+  }, []);
 
   // Handle song change
   useEffect(() => {
@@ -261,8 +284,26 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
+  // Check if we should render the component at all
+  const shouldRender = useRef(true);
+  
+  useEffect(() => {
+    // Only allow one music player to exist in the DOM
+    const existingPlayers = document.querySelectorAll('.audio-player');
+    
+    if (existingPlayers.length > 1) {
+      console.log(`Found ${existingPlayers.length} audio players - hiding this one`);
+      shouldRender.current = false;
+    }
+  }, []);
+  
+  // Don't render anything if we shouldn't
+  if (!shouldRender.current) {
+    return null;
+  }
+  
   return (
-    <div className={`audio-player ${minimized ? 'minimized' : ''}`}>
+    <div className={`audio-player ${minimized ? 'minimized' : ''}`} id="main-audio-player">
       <button 
         className="audio-player-toggle relative overflow-hidden" 
         onClick={(e) => {

@@ -260,7 +260,7 @@
   /* Premium Audio player */
   .audio-player {
     position: fixed;
-    bottom: 20px;
+    bottom: 100px;
     right: 20px;
     background: rgba(0, 0, 10, 0.7);
     backdrop-filter: blur(10px);

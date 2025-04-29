@@ -33,11 +33,7 @@ export const Theme3DProvider: React.FC<{ children: ReactNode }> = ({ children })
       
       setIsMobileDevice(isMobile);
       
-      // Force disable 3D on mobile
-      if (isMobile) {
-        setEnable3D(false);
-        localStorage.setItem('enable3D', 'false');
-      }
+      // Removed the force disable for mobile devices to allow mobile users to toggle 3D
     };
     
     checkMobile();
@@ -57,8 +53,7 @@ export const Theme3DProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [isMobileDevice]);
 
   const toggleEnable3D = () => {
-    if (isMobileDevice) return;
-    
+    // Removed the mobile device check to allow mobile users to toggle 3D
     const newState = !enable3D;
     setEnable3D(newState);
     localStorage.setItem('enable3D', String(newState));

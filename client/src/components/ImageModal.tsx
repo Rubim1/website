@@ -76,6 +76,13 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, title, description, o
                 src={imageUrl} 
                 alt={title} 
                 className="w-full h-auto max-h-[80vh] object-contain" 
+                style={{ 
+                  filter: 'none', // Ensure no compression filters are applied
+                  transform: 'none', // No scaling transformation
+                  imageRendering: 'auto' // Use browser's best quality rendering
+                }}
+                loading="eager" // Load at full priority
+                decoding="async" // Allow async decoding for better performance
               />
             )}
           </div>

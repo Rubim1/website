@@ -3,8 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+// Define an interface for gallery items for better type safety
+interface GalleryItem {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl?: string; // Optional fallback image for videos
+  videoUrl?: string;
+  type: 'image' | 'video';
+}
+
 // Gallery album data
-const galleryItems = [
+const galleryItems: GalleryItem[] = [
   {
     id: 1,
     title: 'foto kelas',
@@ -30,7 +41,8 @@ const galleryItems = [
     id: 4,
     title: 'Momen Spesial',
     description: 'Momen ke rumah wali kelas',
-    imageUrl: 'https://rubim1.github.io/video/vid1.mp4',
+    imageUrl: 'https://rubim1.github.io/video/thumbnail1.jpg', // Use a thumbnail image instead
+    thumbnailUrl: 'https://rubim1.github.io/video/14.jpg', // Fallback to an existing image
     videoUrl: 'https://rubim1.github.io/video/vid1.mp4',
     type: 'video'
   },
@@ -38,7 +50,8 @@ const galleryItems = [
     id: 5,
     title: 'Keseruan teman-teman Kelas',
     description: 'Video kompilasi aktivitas seru kelas kita',
-    imageUrl: 'https://rubim1.github.io/video/vid2.mp4',
+    imageUrl: 'https://rubim1.github.io/video/thumbnail2.jpg', // Use a thumbnail image instead
+    thumbnailUrl: 'https://rubim1.github.io/video/15.jpg', // Fallback to an existing image
     videoUrl: 'https://rubim1.github.io/video/vid2.mp4',
     type: 'video'
   },
@@ -46,7 +59,8 @@ const galleryItems = [
     id: 6,
     title: 'Makan bersama',
     description: 'makan bersama teman-teman kelas di rumah wali kelas',
-    imageUrl: 'https://rubim1.github.io/video/vid3.mp4',
+    imageUrl: 'https://rubim1.github.io/video/thumbnail3.jpg', // Use a thumbnail image instead
+    thumbnailUrl: 'https://rubim1.github.io/video/16.jpg', // Fallback to an existing image
     videoUrl: 'https://rubim1.github.io/video/vid3.mp4',
     type: 'video'
   },
@@ -128,6 +142,12 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
     }
   }, [isOpen]);
 
+  // Function to handle close button click
+  const handleCloseClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling
+    onClose();
+  };
+
   return (
     <motion.div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80"
@@ -138,7 +158,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
       onClick={onClose}
     >
       <motion.div 
-        className="w-full max-w-lg sm:max-w-2xl md:max-w-4xl bg-card/95 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl border border-primary/30"
+        className="w-full max-w-lg sm:max-w-2xl md:max-w-4xl bg-card/95 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl border border-primary/30 relative"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -153,6 +173,15 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
           overflowY: 'auto'
         }}
       >
+        {/* Close button - positioned at top right with higher z-index */}
+        <button 
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/80 text-white hover:bg-primary transition-colors z-50"
+          onClick={handleCloseClick}
+          aria-label="Close modal"
+        >
+          <i className="fas fa-times text-lg"></i>
+        </button>
+
         <div className="aspect-video w-full bg-black/90 relative">
           {/* Add loading indicator */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -165,7 +194,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
             className="w-full h-full relative z-20"
             autoPlay
             playsInline
-            preload="metadata"
+            preload="auto"
             onLoadedData={(e) => {
               // Hide the loading indicator once video is loaded
               if (e.currentTarget.parentElement) {
@@ -174,19 +203,13 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, titl
               }
             }}
             controlsList="nodownload"
+            style={{ filter: 'none', transform: 'none' }} // Ensure no compression filters are applied
           />
         </div>
         <div className="p-4 sm:p-6">
           <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{title}</h3>
           <p className="text-gray-300 text-sm sm:text-base">{description}</p>
         </div>
-        <button 
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 flex items-center justify-center rounded-full bg-black/70 text-white hover:bg-primary transition-colors"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          <i className="fas fa-times"></i>
-        </button>
       </motion.div>
     </motion.div>
   );
@@ -233,7 +256,7 @@ const GallerySection: React.FC = () => {
     };
   }, []);
 
-  const handleVideoOpen = (item: any) => {
+const handleVideoOpen = (item: GalleryItem) => {
     setVideoModal({
       isOpen: true,
       videoUrl: item.videoUrl || '',
@@ -335,39 +358,81 @@ const GallerySection: React.FC = () => {
               >
                 <div className="relative h-56 md:h-64 overflow-hidden">
                   {item.type === 'image' ? (
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title} 
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform"
-                      style={{ 
-                        willChange: 'transform',
-                        transform: isMobile ? 'translateZ(0)' : undefined
-                      }} 
-                      decoding="async"
-                    />
+                    <div 
+                      className="w-full h-full cursor-pointer relative"
+                      onClick={() => openImageModal(item.imageUrl, item.title, item.description)}
+                    >
+                      {/* Compressed preview image - this will load faster */}
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.title} 
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform blur-[1px] scale-105"
+                        style={{ 
+                          willChange: 'transform',
+                          transform: isMobile ? 'translateZ(0)' : undefined,
+                          filter: 'brightness(0.9) contrast(0.95)'
+                        }} 
+                        decoding="async"
+                      />
+                      
+                      {/* View Album overlay with icon */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/90 hover:bg-primary rounded-full flex items-center justify-center shadow-lg">
+                          <i className="fas fa-search-plus text-white text-lg md:text-xl"></i>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="relative w-full h-full">
-                      {/* Only show video thumbnail - actual video will load in modal */}
+                    <div 
+                      className="relative w-full h-full cursor-pointer"
+                      onClick={() => {
+                        if (item.videoUrl) {
+                          handleVideoOpen(item);
+                        }
+                      }}
+                    >
+                      {/* Use actual video as preview - with loop and mute but compressed quality */}
                       <div className="w-full h-full bg-black/40">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.title}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover opacity-90"
-                          style={{transform: 'translateZ(0)'}}
+                        <video
+                          src={item.videoUrl}
+                          className="w-full h-full object-cover opacity-90 blur-[1px] scale-105"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          style={{
+                            transform: 'translateZ(0)',
+                            filter: 'brightness(0.9) contrast(0.95)'
+                          }}
+                          poster={item.thumbnailUrl || ''}
+                          preload="metadata"
+                          onError={(e) => {
+                            // If the video fails, show a fallback image
+                            if (item.thumbnailUrl) {
+                              // Create and show a fallback image if video fails
+                              const fallbackImg = document.createElement('img');
+                              fallbackImg.src = item.thumbnailUrl;
+                              fallbackImg.className = "w-full h-full object-cover opacity-90";
+                              fallbackImg.alt = item.title;
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.appendChild(fallbackImg);
+                                e.currentTarget.style.display = 'none';
+                              }
+                            }
+                          }}
                         />
                       </div>
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/90 hover:bg-primary rounded-full flex items-center justify-center cursor-pointer shadow-lg">
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/90 hover:bg-primary rounded-full flex items-center justify-center shadow-lg">
                           <i className="fas fa-play text-white text-lg md:text-xl"></i>
                         </div>
                       </div>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-70"></div>
-                  <div className="absolute bottom-3 left-4 right-4">
+                  {/* Gradient overlay and text - make sure they don't interfere with clicks on videos */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-70 pointer-events-none"></div>
+                  <div className="absolute bottom-3 left-4 right-4 pointer-events-none">
                     <h3 className="text-lg md:text-xl font-semibold text-white line-clamp-1">{item.title}</h3>
                     <p className="text-xs md:text-sm text-gray-300 line-clamp-1">{item.description}</p>
                   </div>

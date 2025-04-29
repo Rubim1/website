@@ -9,7 +9,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { Theme3DProvider } from "@/contexts/Theme3DContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import SmoothScroll from "@/components/SmoothScroll";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Calculate base URL for production or development environment
 const BASE_URL = import.meta.env.MODE === 'production' ? '/website' : '';
@@ -25,13 +25,18 @@ function Router() {
 }
 
 function App() {
-  const [musicPlayerInstance, setMusicPlayerInstance] = useState<JSX.Element | null>(null);
+  // Import MusicPlayer directly
+  const [MusicPlayer, setMusicPlayer] = useState<React.ComponentType | null>(null);
   
-  // Ensure only one MusicPlayer instance is created
+  // Load the music player component
   useEffect(() => {
+    // Import the component
     import("@/components/MusicPlayer").then((module) => {
-      const MusicPlayer = module.default;
-      setMusicPlayerInstance(<MusicPlayer />);
+      setMusicPlayer(() => module.default);
+      window.musicPlayerActive = true;
+      console.log("Music player initialized and ready to use");
+    }).catch(err => {
+      console.error("Failed to load music player:", err);
     });
   }, []);
 
@@ -42,7 +47,7 @@ function App() {
           <LoadingScreen />
           <SmoothScroll>
             <Router />
-            {musicPlayerInstance}
+            {MusicPlayer && <MusicPlayer />}
             <Toaster />
           </SmoothScroll>
         </AppProvider>

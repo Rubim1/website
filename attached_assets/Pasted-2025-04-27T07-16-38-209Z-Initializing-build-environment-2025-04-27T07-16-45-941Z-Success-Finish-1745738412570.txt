@@ -1,0 +1,86 @@
+2025-04-27T07:16:38.209Z	Initializing build environment...
+2025-04-27T07:16:45.941Z	Success: Finished initializing build environment
+2025-04-27T07:16:46.063Z	Cloning repository...
+2025-04-27T07:16:47.198Z	Detected the following tools from environment: npm@10.8.3, nodejs@22.9.0
+2025-04-27T07:16:47.201Z	Installing project dependencies: npm clean-install --progress=false
+2025-04-27T07:16:54.376Z	npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-04-27T07:16:55.874Z	npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+2025-04-27T07:16:55.961Z	npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+2025-04-27T07:16:38.209Z	Initializing build environment...
+2025-04-27T07:16:45.941Z	Success: Finished initializing build environment
+2025-04-27T07:16:46.063Z	Cloning repository...
+2025-04-27T07:16:47.198Z	Detected the following tools from environment: npm@10.8.3, nodejs@22.9.0
+2025-04-27T07:16:47.201Z	Installing project dependencies: npm clean-install --progress=false
+2025-04-27T07:16:54.376Z	npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-04-27T07:16:55.874Z	npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+2025-04-27T07:16:55.961Z	npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+2025-04-27T07:17:11.100Z	
+2025-04-27T07:17:11.100Z	added 666 packages, and audited 667 packages in 23s
+2025-04-27T07:17:11.105Z	
+2025-04-27T07:17:11.105Z	73 packages are looking for funding
+2025-04-27T07:17:11.106Z	  run `npm fund` for details
+2025-04-27T07:17:11.143Z	
+2025-04-27T07:17:11.143Z	8 moderate severity vulnerabilities
+2025-04-27T07:17:11.143Z	
+2025-04-27T07:17:11.144Z	To address issues that do not require attention, run:
+2025-04-27T07:17:11.144Z	  npm audit fix
+2025-04-27T07:17:11.144Z	
+2025-04-27T07:17:11.144Z	To address all issues (including breaking changes), run:
+2025-04-27T07:17:11.144Z	  npm audit fix --force
+2025-04-27T07:17:11.144Z	
+2025-04-27T07:17:11.146Z	Run `npm audit` for details.
+2025-04-27T07:17:11.195Z	Executing user build command: npm run build
+2025-04-27T07:17:11.484Z	
+2025-04-27T07:17:11.485Z	> rest-express@1.0.0 build
+2025-04-27T07:17:11.485Z	> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-04-27T07:17:11.485Z	
+2025-04-27T07:17:12.079Z	vite v5.4.14 building for production...
+2025-04-27T07:17:12.176Z	transforming...
+2025-04-27T07:17:12.529Z	Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+2025-04-27T07:17:12.530Z	  npx update-browserslist-db@latest
+2025-04-27T07:17:12.530Z	  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-04-27T07:17:21.509Z	✓ 2934 modules transformed.
+2025-04-27T07:17:22.559Z	[plugin:vite:reporter] [plugin vite:reporter] 
+2025-04-27T07:17:22.559Z	(!) /opt/buildhome/repo/client/src/components/MusicPlayer.tsx is dynamically imported by /opt/buildhome/repo/client/src/App.tsx but also statically imported by /opt/buildhome/repo/client/src/components/ScheduleSection.tsx, /opt/buildhome/repo/client/src/pages/Home.tsx, dynamic import will not move module into another chunk.
+2025-04-27T07:17:22.559Z	
+2025-04-27T07:17:22.559Z	rendering chunks...
+2025-04-27T07:17:22.616Z	computing gzip size...
+2025-04-27T07:17:22.669Z	../dist/public/index.html                     3.06 kB │ gzip:   1.22 kB
+2025-04-27T07:17:22.671Z	../dist/public/assets/index-ye4smmk-.css    112.91 kB │ gzip:  18.89 kB
+2025-04-27T07:17:22.677Z	../dist/public/assets/index-BKDwlR_i.js   1,320.54 kB │ gzip: 362.86 kB
+2025-04-27T07:17:22.677Z	
+2025-04-27T07:17:22.678Z	(!) Some chunks are larger than 500 kB after minification. Consider:
+2025-04-27T07:17:22.678Z	- Using dynamic import() to code-split the application
+2025-04-27T07:17:22.678Z	- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-04-27T07:17:22.678Z	- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-04-27T07:17:22.679Z	✓ built in 10.56s
+2025-04-27T07:17:22.768Z	
+2025-04-27T07:17:22.769Z	  dist/index.js  28.2kb
+2025-04-27T07:17:22.769Z	
+2025-04-27T07:17:22.769Z	⚡ Done in 10ms
+2025-04-27T07:17:22.781Z	Success: Build command completed
+2025-04-27T07:17:22.782Z	Executing user deploy command: npx wrangler deploy
+2025-04-27T07:17:24.252Z	
+2025-04-27T07:17:24.252Z	 ⛅️ wrangler 4.13.2
+2025-04-27T07:17:24.252Z	-------------------
+2025-04-27T07:17:24.252Z	
+2025-04-27T07:17:24.324Z	▲ [WARNING] Processing wrangler.toml configuration:
+2025-04-27T07:17:24.325Z	
+2025-04-27T07:17:24.325Z	    - Because you've defined a [site] configuration, we're defaulting to "workers-site" for the deprecated `site.entry-point`field.
+2025-04-27T07:17:24.325Z	      Add the top level `main` field to your configuration file:
+2025-04-27T07:17:24.325Z	      ```
+2025-04-27T07:17:24.326Z	      main = "workers-site/index.js"
+2025-04-27T07:17:24.326Z	      ```
+2025-04-27T07:17:24.327Z	    - Unexpected fields found in top-level field: "redirects"
+2025-04-27T07:17:24.327Z	
+2025-04-27T07:17:24.329Z	
+2025-04-27T07:17:24.330Z	✘ [ERROR] It looks like you've run a Workers-specific command in a Pages project.
+2025-04-27T07:17:24.330Z	
+2025-04-27T07:17:24.330Z	  For Pages, please run `wrangler pages deploy` instead.
+2025-04-27T07:17:24.330Z	
+2025-04-27T07:17:24.330Z	
+2025-04-27T07:17:24.331Z	
+2025-04-27T07:17:24.331Z	
+2025-04-27T07:17:24.331Z	Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+2025-04-27T07:17:24.357Z	🪵  Logs were written to "/opt/buildhome/.config/.wrangler/logs/wrangler-2025-04-27_07-17-23_772.log"
+2025-04-27T07:17:24.471Z	Failed: error occurred while running deploy command
