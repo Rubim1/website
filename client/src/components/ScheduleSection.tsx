@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import MusicPlayer from './MusicPlayer';
 
 interface ScheduleDay {
   day: string;
@@ -202,8 +201,7 @@ const ScheduleSection: React.FC = () => {
           </div>
         </motion.div>
         
-        {/* Music Player */}
-        <MusicPlayer />
+
       </div>
     </section>
   );

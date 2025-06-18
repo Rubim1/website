@@ -29,13 +29,6 @@ interface ChatMessage {
   isDeleted?: boolean;
   // Add new field for typing indicator
   isTyping?: boolean;
-  // Add device ID field to identify the sender's device
-  deviceId?: string;
-  // Flag for optimistic messages (shown before confirmation from Firebase)
-  isOptimistic?: boolean;
-  // For image messages
-  isImage?: boolean;
-  imageUrl?: string;
 }
 
 interface UserProfile {
@@ -64,10 +57,8 @@ const ChatSection: React.FC = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [isGitHubPages, setIsGitHubPages] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -181,17 +172,6 @@ const ChatSection: React.FC = () => {
     if (savedName) setProfileName(savedName);
     if (savedPhoto) setPhotoBase64(savedPhoto);
     
-    // Check for existing device ID or generate a new one
-    const existingDeviceId = localStorage.getItem('chat_device_id');
-    if (!existingDeviceId) {
-      // Generate a new device ID using a combination of timestamp and random string
-      const newDeviceId = `device_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-      localStorage.setItem('chat_device_id', newDeviceId);
-      console.log('Generated new device ID:', newDeviceId);
-    } else {
-      console.log('Using existing device ID:', existingDeviceId);
-    }
-    
     // Setup all chat is now handled through Firebase for all environments
     setIsGitHubPages(true);
     setIsWebSocketConnected(true);
@@ -217,9 +197,8 @@ const ChatSection: React.FC = () => {
     }
     
     // Set up message listener - works even without login for read-only
-    const unsubMessages = subscribeToMessages((fbMessages) => {
-      // Convert Firebase messages to our app's message format
-      const convertedMessages = fbMessages.map(msg => ({
+    const unsubMessages = subscribeToMessages((messages) => {
+      const convertedMessages = messages.map(msg => ({
         id: msg.id,
         name: msg.name,
         photoUrl: msg.photoUrl,
@@ -227,46 +206,10 @@ const ChatSection: React.FC = () => {
         timestamp: new Date(msg.timestamp || Date.now()),
         isDeleted: msg.isDeleted || false,
         isImage: msg.isImage || false,
-        imageUrl: msg.imageUrl || '',
-        deviceId: msg.deviceId || ''
+        imageUrl: msg.imageUrl || ''
       }));
-      
       console.log(`Loaded ${convertedMessages.length} messages from Firebase`);
-      
-      // Update the messages with special handling for optimistic messages
-      setMessages(prevMessages => {
-        // Untuk device ini, ganti optimistic messages dengan pesan dari database
-        // tapi tetap pertahankan optimistic status jika belum ada di database
-        const deviceId = localStorage.getItem('chat_device_id') || '';
-        
-        // Filter pesan-pesan yang akan dipakai - dengan prioritas:
-        // 1. Pesan dari orang lain langsung dari Firebase
-        // 2. Pesan saya yang sudah dikonfirmasi Firebase (ganti optimistic messages)
-        // 3. Pesan saya yang masih optimistic (belum dikonfirmasi)
-        const filteredMessages = prevMessages.filter(msg => {
-          // Jika bukan pesan optimistic, keep (pesan dari orang lain atau sistem)
-          if (!msg.isOptimistic) return true;
-          
-          // Jika pesan optimistic, cek apakah sudah ada confirmasi dari Firebase
-          const hasConfirmation = convertedMessages.some(fbMsg => 
-            fbMsg.text === msg.text && 
-            fbMsg.deviceId === msg.deviceId && 
-            Math.abs(fbMsg.timestamp.getTime() - msg.timestamp.getTime()) < 10000
-          );
-          
-          // Jika ada confirmasi, hapus optimistic message (karena akan diganti)
-          return !hasConfirmation;
-        });
-        
-        // Gabungkan pesan dari Firebase dan optimistic messages yang masih valid
-        return [...filteredMessages, ...convertedMessages]
-          // Hapus duplikat berdasarkan ID (prioritaskan pesan dari Firebase)
-          .filter((msg, index, self) => 
-            index === self.findIndex(m => m.id === msg.id)
-          )
-          // Urutkan berdasarkan waktu
-          .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-      });
+      setMessages(convertedMessages);
     });
     
     // Set up typing indicator listener
@@ -287,9 +230,10 @@ const ChatSection: React.FC = () => {
     };
   }, []);
 
-  // Save messages to localStorage when they change (but don't auto-scroll anymore)
+  // Scroll to bottom when messages change and save to localStorage
   useEffect(() => {
-    // Only save messages, don't auto-scroll on every message change
+    scrollToBottom();
+    
     try {
       // Save only last 20 messages to localStorage to prevent "QuotaExceededError"
       const lastMessages = messages.slice(-20);
@@ -355,21 +299,6 @@ const ChatSection: React.FC = () => {
       connectWebSocket();
     }
   }, [userProfile]);
-  
-  // Deteksi scroll untuk menampilkan tombol scroll ke bawah
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    
-    const handleScroll = () => {
-      // Jika user sudah scroll lebih dari 200px dari bawah, tampilkan tombol
-      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
-      setShowScrollButton(!isNearBottom);
-    };
-    
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -385,14 +314,14 @@ const ChatSection: React.FC = () => {
       // Add a welcome message for Firebase mode
       const welcomeMessage = {
         id: `github-pages-welcome-${Date.now()}`,
-        name: "Dev Itsbymz",
-        photoUrl: "https://i.ibb.co/C82Dh5Z/profile.png",
-        text: "Halo semua, selamat datang di website 7 Amazing! 🎉 Ruang obrolan ini adalah tempat kalian bisa berbagi ide dan berinteraksi dengan sesama. Mari menjaga komunikasi yang positif dan saling menghargai satu sama lain. Ingat, kata-kata kita mencerminkan siapa kita. Selamat mengobrol! ✨",
+        name: "System",
+        photoUrl: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmYTUwMCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4LTggOCAzLjU5IDggOC0zLjU5IDgtOCA4eiIvPjxwYXRoIGZpbGw9IiNmZmE1MDAiIGQ9Ik0xMiA2Yy0zLjMxIDAtNiAyLjY5LTYgNnMyLjY5IDYgNiA2IDYtMi42OSA2LTYtMi42OS02LTYtNnptMCAxMGMtMi4yMSAwLTQtMS43OS00LTRzMS43OS00IDQtNCA0IDEuNzkgNCA0LTEuNzkgNC00IDR6Ii8+PC9zdmc+",
+        text: "GitHub Pages mode active with Firebase. You can chat in real-time across all users viewing this page!",
         timestamp: new Date()
       };
       
-      // Only add if we don't have pesan welcome dari Dev Itsbymz
-      if (!messages.some(msg => msg.name === "Dev Itsbymz" && msg.text.includes("Halo semua, selamat datang"))) {
+      // Only add if we don't have it already
+      if (!messages.some(msg => msg.text.includes("GitHub Pages mode active with Firebase"))) {
         setMessages(prev => [...prev, welcomeMessage]);
       }
       
@@ -504,69 +433,30 @@ const ChatSection: React.FC = () => {
     // Validate message and connection
     if (!newMessage.trim() || !userProfile.name || !isWebSocketConnected) return;
 
-    // Store the message text before resetting it
-    const messageText = newMessage;
-    
-    // Get a device ID for tracking the sender
-    const deviceId = localStorage.getItem('chat_device_id') || 
-      `device_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    
-    // Create a temporary ID for the message
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    
-    // Immediately add optimistic message to UI
-    const optimisticMessage: ChatMessage = {
-      id: tempId,
-      name: userProfile.name,
-      photoUrl: userProfile.photoUrl,
-      text: messageText,
-      timestamp: new Date(),
-      deviceId: deviceId,
-      isOptimistic: true // Flag to identify this as an optimistic update
-    };
-    
-    // Add to messages immediately for instant feedback
-    setMessages(prev => [...prev, optimisticMessage]);
-    
-    // Immediately clear input field to prevent double submissions
-    setNewMessage('');
-    
-    // Scroll to bottom when user sends a message (but not for received messages)
-    setTimeout(() => scrollToBottom(), 100);
-    
-    // Clear typing indicator and any timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
-    }
-    
-    // Use button state to prevent multiple clicks
     try {
       // Clear typing indicator first
       await setTypingStatus(false);
       
-      // Send message to Firebase (this might take some time)
+      // Send message to Firebase
       await sendMessage({
-        text: messageText
+        text: newMessage
       });
       
-      // Messages will be added via the subscription from Firebase
-      // We don't need to manually add the message again since we've already shown the optimistic update
-      
+      // Reset input (messages will be added via the subscription)
+      setNewMessage('');
+            
+      // Clear any existing typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
     } catch (error) {
       console.error('Error sending message:', error);
-      
-      // Remove the optimistic message from the UI if it failed
-      setMessages(prev => prev.filter(msg => msg.id !== tempId));
-      
       toast({
         title: "Gagal mengirim pesan",
         description: "Pesan tidak dapat dikirim. Silakan coba lagi.",
         variant: "destructive",
       });
-      
-      // Put the message text back in the input field
-      setNewMessage(messageText);
     }
   };
 
@@ -687,18 +577,6 @@ const ChatSection: React.FC = () => {
   const generateId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
-  
-  // Helper to generate a device ID
-  const generateDeviceId = () => {
-    const timestamp = Date.now().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 10);
-    const screenInfo = `${window.screen.width}x${window.screen.height}`;
-    const userAgent = navigator.userAgent.split(' ').pop() || '';
-    
-    const deviceId = `${timestamp}-${randomStr}-${screenInfo}-${userAgent}`.substring(0, 50);
-    localStorage.setItem('chat_device_id', deviceId);
-    return deviceId;
-  };
 
   const setCookie = (name: string, value: string, days: number) => {
     const d = new Date();
@@ -802,20 +680,7 @@ const ChatSection: React.FC = () => {
               </div>
               
               {/* Messages Container */}
-              <div 
-                ref={messagesContainerRef}
-                className="p-4 h-[450px] overflow-y-auto bg-gradient-to-b from-black/50 to-black/30 backdrop-blur-md scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent relative"
-              >
-                {/* Tombol scroll ke bawah - hanya muncul saat scroll atas */}
-                {showScrollButton && (
-                  <button 
-                    onClick={scrollToBottom}
-                    className="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-accent/80 text-white shadow-lg flex items-center justify-center hover:bg-accent z-10 opacity-80 hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <i className="fas fa-chevron-down"></i>
-                  </button>
-                )}
-                
+              <div className="p-4 h-[450px] overflow-y-auto bg-gradient-to-b from-black/50 to-black/30 backdrop-blur-md scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <i className="fas fa-comments text-5xl mb-4 text-accent/40"></i>
@@ -824,97 +689,78 @@ const ChatSection: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {messages.map((msg) => {
-                      // Determine if the message is from the current device
-                      const deviceId = localStorage.getItem('chat_device_id') || '';
-                      const isCurrentUser = msg.deviceId === deviceId;
-                      
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} group`}
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.name === userProfile.name ? 'justify-end' : 'justify-start'} group`}
+                      >
+                        {msg.name !== userProfile.name && (
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10 mr-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
+                              <img src={msg.photoUrl} alt={msg.name} className="object-cover" />
+                            </Avatar>
+                          </div>
+                        )}
+                        
+                        <div 
+                          className={`
+                            relative max-w-[85%] md:max-w-[75%] p-3 rounded-2xl backdrop-blur-sm shadow-md
+                            ${msg.name === userProfile.name 
+                              ? 'bg-gradient-to-br from-accent/30 to-accent/10 text-white rounded-tr-none border border-accent/10' 
+                              : 'bg-gradient-to-br from-gray-800/70 to-gray-800/40 text-white rounded-tl-none border border-gray-700/20'
+                            }
+                          `}
                         >
-                          {!isCurrentUser && (
-                            <div className="flex-shrink-0">
-                              <Avatar className="h-10 w-10 mr-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
-                                <img 
-                                  src={msg.photoUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBiOGZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci11c2VyIj48cGF0aCBkPSJNMjAgMjF2LTJhNCA0IDAgMCAwLTQtNEg4YTQgNCAwIDAgMC00IDR2MiI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+'} 
-                                  alt={msg.name} 
-                                  className="object-cover" 
-                                />
-                              </Avatar>
-                            </div>
+                          {msg.name !== userProfile.name && (
+                            <div className="text-accent/90 text-sm font-medium mb-1">{msg.name}</div>
                           )}
                           
-                          <div 
-                            className={`
-                              relative max-w-[85%] md:max-w-[75%] p-3 rounded-2xl backdrop-blur-sm shadow-md
-                              ${isCurrentUser 
-                                ? 'bg-gradient-to-br from-accent/30 to-accent/10 text-white rounded-tr-none border border-accent/10' 
-                                : 'bg-gradient-to-br from-gray-800/70 to-gray-800/40 text-white rounded-tl-none border border-gray-700/20'
-                              }
-                            `}
-                          >
-                            {!isCurrentUser && (
-                              <div className="text-accent/90 text-sm font-medium mb-1">{msg.name}</div>
-                            )}
-                            
-                            <p className="text-white break-words">{msg.text}</p>
-                            
-                            {/* Timestamp */}
-                            <div className={`text-gray-400 text-xs mt-1 ${isCurrentUser ? 'text-right' : 'text-left'} opacity-70`}>
-                              {formatTime(msg.timestamp)}
-                            </div>
-                            
-                            {/* Message status for own messages */}
-                            {isCurrentUser && (
-                              <div className="absolute -bottom-4 right-2 text-accent/80 text-xs flex items-center">
-                                {msg.isOptimistic ? (
-                                  <>
-                                    <i className="fas fa-clock-o mr-1 text-[10px] animate-pulse"></i>
-                                    <span className="text-[10px]">Mengirim...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <i className="fas fa-check-double mr-1 text-[10px]"></i>
-                                    <span className="text-[10px]">Terkirim</span>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Delete button - only for own messages */}
-                            {isCurrentUser && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      onClick={() => handleDeleteMessage(msg.id)}
-                                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-600/80 hover:bg-red-500 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md"
-                                      variant="destructive"
-                                      size="sm"
-                                    >
-                                      <i className="fas fa-times text-xs"></i>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className="text-xs">Hapus pesan</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
+                          <p className="text-white break-words">{msg.text}</p>
+                          
+                          {/* Timestamp */}
+                          <div className={`text-gray-400 text-xs mt-1 ${msg.name === userProfile.name ? 'text-right' : 'text-left'} opacity-70`}>
+                            {formatTime(msg.timestamp)}
                           </div>
                           
-                          {isCurrentUser && (
-                            <div className="flex-shrink-0">
-                              <Avatar className="h-10 w-10 ml-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
-                                <img src={msg.photoUrl} alt={msg.name} className="object-cover" />
-                              </Avatar>
+                          {/* Message status for own messages */}
+                          {msg.name === userProfile.name && (
+                            <div className="absolute -bottom-4 right-2 text-accent/80 text-xs flex items-center">
+                              <i className="fas fa-check-double mr-1 text-[10px]"></i>
+                              <span className="text-[10px]">Terkirim</span>
                             </div>
                           )}
+                          
+                          {/* Delete button - only for own messages */}
+                          {msg.name === userProfile.name && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-600/80 hover:bg-red-500 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md"
+                                    variant="destructive"
+                                    size="sm"
+                                  >
+                                    <i className="fas fa-times text-xs"></i>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Hapus pesan</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
-                      );
-                    })}
+                        
+                        {msg.name === userProfile.name && (
+                          <div className="flex-shrink-0">
+                            <Avatar className="h-10 w-10 ml-2 mt-1 border-2 border-accent/20 rounded-full overflow-hidden shadow-lg glow-sm">
+                              <img src={msg.photoUrl} alt={msg.name} className="object-cover" />
+                            </Avatar>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
                 {/* This div is used to scroll into view when new messages arrive */}

@@ -61,8 +61,7 @@ const defaultSongs: Song[] = [
 ];
 
 const MusicPlayer: React.FC = () => {
-  // Start minimized by default
-  const [minimized, setMinimized] = useState(true);
+  const [minimized, setMinimized] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [songs, setSongs] = useState<Song[]>(defaultSongs);
@@ -77,27 +76,12 @@ const MusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load the first song by default and ensure we only initialize once
+  // Initialize the first song
   useEffect(() => {
-    // Mark this instance as the active player
-    window.musicPlayerActive = true;
-    
-    // Check if we already have a player instance to avoid duplicates
-    if (window.hasOwnProperty('musicPlayerActive') && window.musicPlayerActive !== true) {
-      console.log('Multiple music player instances detected - deactivating this one');
-      return;
-    }
-    
-    // Initialize player instance (only once)
     if (songs.length > 0 && !currentSong) {
       setCurrentSong(songs[0]);
     }
-    
-    // Cleanup function for when component unmounts
-    return () => {
-      window.musicPlayerActive = false; 
-    };
-  }, []);
+  }, [songs, currentSong]);
 
   // Handle song change
   useEffect(() => {
@@ -284,23 +268,7 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
-  // Check if we should render the component at all
-  const shouldRender = useRef(true);
-  
-  useEffect(() => {
-    // Only allow one music player to exist in the DOM
-    const existingPlayers = document.querySelectorAll('.audio-player');
-    
-    if (existingPlayers.length > 1) {
-      console.log(`Found ${existingPlayers.length} audio players - hiding this one`);
-      shouldRender.current = false;
-    }
-  }, []);
-  
-  // Don't render anything if we shouldn't
-  if (!shouldRender.current) {
-    return null;
-  }
+
   
   return (
     <div className={`audio-player ${minimized ? 'minimized' : ''}`} id="main-audio-player">
@@ -311,7 +279,7 @@ const MusicPlayer: React.FC = () => {
           setMinimized(!minimized);
         }}
       >
-        <i className={`fas ${minimized ? 'fa-expand' : 'fa-compress'} text-blue-300`}></i>
+        <i className={`fas ${minimized ? 'fa-expand' : 'fa-compress'} text-blue-400`}></i>
       </button>
 
       {minimized ? (
@@ -319,7 +287,7 @@ const MusicPlayer: React.FC = () => {
           className="flex items-center justify-center h-full cursor-pointer" 
           onClick={() => setMinimized(false)}
         >
-          <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-2xl text-blue-300`}></i>
+          <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-2xl text-blue-400`}></i>
         </div>
       ) : (
         <>
@@ -418,7 +386,7 @@ const MusicPlayer: React.FC = () => {
                     }
                   }}
                 >
-                  <i className="fas fa-backward text-blue-300"></i>
+                  <i className="fas fa-backward text-blue-400"></i>
                 </Button>
                 <Button
                   variant="ghost" 
@@ -429,7 +397,7 @@ const MusicPlayer: React.FC = () => {
                     togglePlay();
                   }}
                 >
-                  <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-blue-300 text-xl`}></i>
+                  <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-blue-400 text-xl`}></i>
                 </Button>
                 <Button
                   variant="ghost" 
@@ -444,7 +412,7 @@ const MusicPlayer: React.FC = () => {
                     }
                   }}
                 >
-                  <i className="fas fa-forward text-blue-300"></i>
+                  <i className="fas fa-forward text-blue-400"></i>
                 </Button>
               </div>
 
@@ -508,14 +476,14 @@ const MusicPlayer: React.FC = () => {
                     setCurrentSong(song);
                   }}
                 >
-                  <i className={`fas fa-${song.type === 'local' ? 'music' : song.type} text-blue-300 mr-2`}></i>
+                  <i className={`fas fa-${song.type === 'local' ? 'music' : song.type} text-blue-400 mr-2`}></i>
                   <div className="overflow-hidden">
                     <div className="text-sm text-white truncate">{song.title}</div>
-                    <div className="text-xs text-blue-300/70 truncate">{song.artist}</div>
+                    <div className="text-xs text-blue-400/70 truncate">{song.artist}</div>
                   </div>
                   {currentSong?.id === song.id && (
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                      <i className="fas fa-volume-up text-blue-300 text-xs animate-pulse"></i>
+                      <i className="fas fa-volume-up text-blue-400 text-xs animate-pulse"></i>
                     </div>
                   )}
                 </div>

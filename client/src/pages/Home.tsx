@@ -9,7 +9,7 @@ import CalendarSection from '@/components/CalendarSection';
 import ChatSection from '@/components/ChatSection';
 import Footer from '@/components/Footer';
 import ImageModal from '@/components/ImageModal';
-import MusicPlayer from '@/components/MusicPlayer';
+
 import { useAppContext } from '@/contexts/AppContext';
 
 const Home: React.FC = () => {
@@ -35,8 +35,7 @@ const Home: React.FC = () => {
         <Footer />
       </div>
       
-      {/* Music Player */}
-      <MusicPlayer />
+
       
       {/* Image Modal */}
       {imageModal.isOpen && <ImageModal 

@@ -9,7 +9,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
     <!-- Spline Viewer for optional 3D background -->
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.85/build/spline-viewer.js"></script>
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.9/build/spline-viewer.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        // Make sure Spline loads properly
+        window.splineViewerReady = false;
+        
+        // Check if Spline viewer is defined
+        const checkSplineLoaded = () => {
+          if (customElements && customElements.get('spline-viewer')) {
+            window.splineViewerReady = true;
+            window.dispatchEvent(new CustomEvent('spline-viewer-ready'));
+            console.log("Spline viewer successfully loaded");
+            return true;
+          }
+          return false;
+        };
+        
+        // Try immediately
+        if (!checkSplineLoaded()) {
+          // Try again after a delay
+          setTimeout(checkSplineLoaded, 1500);
+          // And one more time after a longer delay
+          setTimeout(checkSplineLoaded, 3000);
+        }
+      });
+    </script>
     
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">

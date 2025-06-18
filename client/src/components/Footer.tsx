@@ -14,7 +14,9 @@ const Footer: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h3 className="text-xl font-semibold text-primary mb-4">7 Amazing</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              <span className="bg-gradient-to-r from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent">7 Amazing</span>
+            </h3>
             <p className="text-gray-400 mb-4">A class of talented and dedicated students striving for excellence in everything we do.</p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-primary transition-colors">

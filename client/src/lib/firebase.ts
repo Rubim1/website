@@ -48,7 +48,6 @@ export interface FirebaseMessage {
   isDeleted?: boolean;
   isImage?: boolean;
   imageUrl?: string;
-  deviceId?: string; // Added device ID for message sender
 }
 
 export interface UserInfo {
@@ -57,7 +56,6 @@ export interface UserInfo {
   photoURL: string;
   online: boolean;
   lastActive?: number;
-  deviceId?: string; // Added device identifier
 }
 
 // Track current user
@@ -71,37 +69,9 @@ const messagesRef = ref(db, 'messages');
 const usersRef = ref(db, 'users');
 const typingRef = ref(db, 'typing');
 
-// Generate a device ID
-const generateDeviceId = (): string => {
-  // First try to get from local storage
-  const storedDeviceId = localStorage.getItem('chat_device_id');
-  if (storedDeviceId) return storedDeviceId;
-  
-  // Create a new device ID based on timestamp, random number and some device info
-  const timestamp = Date.now().toString(36);
-  const randomStr = Math.random().toString(36).substring(2, 10);
-  const screenInfo = `${window.screen.width}x${window.screen.height}`;
-  const userAgent = navigator.userAgent.split(' ').pop() || '';
-  
-  const deviceId = `${timestamp}-${randomStr}-${screenInfo}-${userAgent}`.substring(0, 50);
-  
-  // Save to local storage for future use
-  localStorage.setItem('chat_device_id', deviceId);
-  
-  return deviceId;
-};
-
 // Login anonymously with a display name
 export const loginAnonymously = async (displayName: string, photoURL: string) => {
   try {
-    // Add default profile photo if not provided
-    if (!photoURL || photoURL.trim() === '') {
-      photoURL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBiOGZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci11c2VyIj48cGF0aCBkPSJNMjAgMjF2LTJhNCA0IDAgMCAwLTQtNEg4YTQgNCAwIDAgMC00IDR2MiI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+';
-    }
-    
-    // Get or create device ID
-    const deviceId = generateDeviceId();
-    
     // Sign in anonymously to Firebase
     const result = await signInAnonymously(auth);
     currentUser = result.user;
@@ -114,8 +84,7 @@ export const loginAnonymously = async (displayName: string, photoURL: string) =>
       displayName: displayName,
       photoURL: photoURL,
       online: true,
-      lastActive: Date.now(),
-      deviceId: deviceId // Store device ID with the user profile
+      lastActive: Date.now()
     };
     
     // Save user in the Realtime Database
@@ -204,9 +173,6 @@ export const sendMessage = async (message: { text: string }) => {
     // Create a message reference with a unique key
     const newMessageRef = push(messagesRef);
     
-    // Get the device ID
-    const deviceId = currentUserProfile.deviceId || generateDeviceId();
-    
     // Create message data
     const messageData = {
       uid: currentUser.uid,
@@ -214,8 +180,7 @@ export const sendMessage = async (message: { text: string }) => {
       photoUrl: currentUserProfile.photoURL,
       text: message.text,
       timestamp: serverTimestamp(),
-      isDeleted: false,
-      deviceId: deviceId // Include device ID with each message
+      isDeleted: false
     };
     
     // Save the message to the database

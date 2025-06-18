@@ -53,122 +53,93 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className={`fixed w-full z-50 transition-all duration-500 ${
-        scrolled ? 'py-2 glass-card-dark border-b border-accent/10' : 'py-4 bg-transparent'
-      }`}>
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          {/* Logo */}
-          <motion.a 
-            href="#hero" 
-            className="flex items-center group magnetic-button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onMouseMove={(e) => {
-              const resetTransform = magneticEffect(e, 15);
-              setTimeout(resetTransform, 1000);
-            }}
-            onMouseLeave={(e) => {
-              const target = e.currentTarget;
-              target.style.transform = 'translate(0px, 0px)';
-            }}
-          >
-            <span className="text-2xl font-bold font-orbitron relative">
-              <span className="seven-text mr-1">7</span>
-              <span className="modern-gradient-text">AMAZING</span>
-              <motion.span 
-                className="absolute -bottom-1 left-0 h-0.5 bg-accent/80"
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
-              />
-            </span>
-          </motion.a>
+      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 w-auto">
+        <motion.div 
+          className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 shadow-2xl max-w-5xl"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex items-center space-x-4">
+            {/* Logo */}
+            <motion.a 
+              href="#hero" 
+              className="flex items-center group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-xl font-bold font-orbitron relative">
+                <span className="bg-gradient-to-r from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent mr-1">7</span>
+                <span className="text-white">AMAZING</span>
+              </span>
+            </motion.a>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="bg-black/20 backdrop-blur-sm rounded-full border border-accent/10 p-1">
+            {/* Desktop Menu */}
+            <div className="hidden lg:flex items-center space-x-1">
               {navLinks.map((link, index) => (
                 <motion.a 
                   key={index} 
                   href={link.url}
-                  className={`px-4 py-2 mx-1 rounded-full transition-all duration-300 text-sm relative ripple-container ${
+                  className={`px-4 py-2 rounded-full transition-all duration-300 text-sm relative ${
                     activeLink === link.url 
-                      ? 'text-white bg-accent/20 border border-accent/30 shine-effect' 
-                      : 'text-gray-300 hover:text-white border border-transparent'
+                      ? 'text-black bg-white font-medium' 
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
-                  whileHover={{ 
-                    scale: 1.05,
-                    textShadow: '0 0 5px rgba(0, 184, 255, 0.5)'
-                  }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => createRipple(e)}
-                  onMouseEnter={(e) => {
-                    // Add a subtle glow effect on hover
-                    const target = e.currentTarget;
-                    target.style.boxShadow = '0 0 5px rgba(0, 184, 255, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    const target = e.currentTarget;
-                    target.style.boxShadow = 'none';
-                  }}
                 >
                   {link.title}
-                  {activeLink === link.url && (
-                    <motion.span 
-                      className="absolute inset-0 rounded-full bg-accent/10 -z-10"
-                      layoutId="activeNavItem"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
                 </motion.a>
               ))}
             </div>
             
-            {/* AI Chat Link */}
-            <Link href="/ai-chat">
-              <motion.div 
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white font-semibold text-sm ripple-container cursor-pointer"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 0 15px rgba(60, 60, 255, 0.5)"
-                }}
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => createRipple(e)}
-              >
-                <i className="fas fa-robot mr-2"></i>
-                AI Chat
-              </motion.div>
-            </Link>
-          </div>
+            {/* AI Chat Link - Desktop */}
+            <div className="hidden lg:block">
+              <Link href="/ai-chat">
+                <motion.div 
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-full text-white font-medium text-sm cursor-pointer"
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)"
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <i className="fas fa-robot mr-2"></i>
+                  AI Chat
+                </motion.div>
+              </Link>
+            </div>
 
-          {/* Mobile Menu Button */}
-          <motion.button 
-            className="md:hidden glass-card rounded-full h-10 w-10 flex items-center justify-center focus:outline-none"
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <motion.div
-              animate={mobileMenuOpen ? "open" : "closed"}
-              variants={{
-                open: { rotate: 180 },
-                closed: { rotate: 0 }
-              }}
-              transition={{ duration: 0.3 }}
+            {/* Mobile Menu Button */}
+            <motion.button 
+              className="lg:hidden bg-white/10 backdrop-blur-sm rounded-full h-10 w-10 flex items-center justify-center focus:outline-none"
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-accent`}></i>
-            </motion.div>
-          </motion.button>
-        </div>
+              <motion.div
+                animate={mobileMenuOpen ? "open" : "closed"}
+                variants={{
+                  open: { rotate: 180 },
+                  closed: { rotate: 0 }
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-white`}></i>
+              </motion.div>
+            </motion.button>
+          </div>
+        </motion.div>
       </nav>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div 
-            className="fixed inset-0 z-40 glass-card-dark md:hidden flex flex-col pt-24"
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xl lg:hidden flex flex-col pt-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
             <div className="container mx-auto px-4 flex flex-col space-y-6 items-center">
               <div className="w-full max-w-md mx-auto">
@@ -176,91 +147,40 @@ const Navbar: React.FC = () => {
                   <motion.a 
                     key={index} 
                     href={link.url}
-                    className={`neon-border glass-card rounded-lg my-3 py-4 px-6 flex items-center justify-between w-full ripple-container ${
-                      activeLink === link.url ? 'border-accent/50 text-white' : 'text-gray-200'
+                    className={`bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl my-3 py-4 px-6 flex items-center justify-between w-full ${
+                      activeLink === link.url ? 'bg-white text-black' : 'text-white'
                     }`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    onClick={(e) => {
-                      createRipple(e);
-                      setMobileMenuOpen(false);
-                    }}
-                    whileHover={{ 
-                      scale: 1.03,
-                      boxShadow: "0 0 15px rgba(0, 184, 255, 0.3)",
-                      x: 5
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <span className="text-xl">{link.title}</span>
-                    <motion.div
-                      whileHover={{
-                        x: [0, 5, 0],
-                        transition: { duration: 0.5, repeat: Infinity }
-                      }}
-                    >
-                      <i className="fas fa-chevron-right text-accent"></i>
-                    </motion.div>
+                    <span className="text-lg font-medium">{link.title}</span>
+                    <i className="fas fa-chevron-right"></i>
                   </motion.a>
                 ))}
               </div>
 
-
               {/* AI Chat Link for Mobile */}
               <motion.div
-                className="pt-3 w-full max-w-md mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                className="w-full max-w-md mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: navLinks.length * 0.1 + 0.1 }}
               >
                 <Link href="/ai-chat">
                   <motion.div 
-                    className="neon-border glass-card rounded-lg my-3 py-4 px-6 flex items-center justify-between w-full ripple-container text-white bg-gradient-to-r from-blue-600 to-purple-600"
-                    onClick={(e) => {
-                      createRipple(e);
-                      setMobileMenuOpen(false);
-                    }}
-                    whileHover={{ 
-                      scale: 1.03,
-                      boxShadow: "0 0 15px rgba(60, 60, 255, 0.5)",
-                      x: 5
-                    }}
-                    whileTap={{ scale: 0.97 }}
+                    className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-2xl py-4 px-6 flex items-center justify-between w-full text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <span className="text-xl">AI Chat</span>
-                    <motion.div
-                      whileHover={{
-                        x: [0, 5, 0],
-                        transition: { duration: 0.5, repeat: Infinity }
-                      }}
-                    >
-                      <i className="fas fa-robot text-white"></i>
-                    </motion.div>
+                    <span className="text-lg font-medium">AI Chat</span>
+                    <i className="fas fa-robot"></i>
                   </motion.div>
                 </Link>
-              </motion.div>
-
-              <motion.div
-                className="pt-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: navLinks.length * 0.1 + 0.2 }}
-              >
-                <motion.button 
-                  className="modern-button bg-accent/80 text-white px-8 py-3 rounded-full border border-accent/50 ripple-container push-button"
-                  onClick={(e) => {
-                    createRipple(e);
-                    setMobileMenuOpen(false);
-                  }}
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: "0 0 15px rgba(0, 184, 255, 0.5)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Close Menu
-                </motion.button>
               </motion.div>
             </div>
           </motion.div>

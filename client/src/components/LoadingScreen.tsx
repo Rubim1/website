@@ -34,7 +34,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
   const animateTextControls = useAnimation();
   const loadingStartTime = useRef(Date.now());
   const resourcesChecked = useRef(false);
-  
+
   // Logo animation sequences
   useEffect(() => {
     const sequence = async () => {
@@ -43,7 +43,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
         opacity: 1,
         transition: { duration: 1.5, ease: "easeOut" }
       });
-      
+
       // Pulse animation
       animateLogoControls.start({
         scale: [1, 1.05, 1],
@@ -54,7 +54,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
         }
       });
     };
-    
+
     sequence();
   }, [animateLogoControls]);
 
@@ -67,7 +67,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
         transition: { duration: 0.8, delay: 0.5 }
       });
     };
-    
+
     textSequence();
   }, [animateTextControls]);
 
@@ -75,19 +75,19 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
   const checkAllResourcesLoaded = () => {
     if (resourcesChecked.current) return;
     resourcesChecked.current = true; // Mark as checked immediately to avoid double-calls
-    
+
     console.log('Starting resource check');
-    
+
     try {
       // Only check a limited set of critical resources to avoid problems
       // Focus mainly on images which are most likely to cause loading issues
       const allResources: HTMLElement[] = [];
       const images = document.querySelectorAll('img');
       images.forEach(el => allResources.push(el as HTMLElement));
-      
+
       console.log(`Found ${allResources.length} resources to check`);
       setResourcesLeft(allResources.length);
-      
+
       // If very few or no resources, add artificial delay but proceed quickly
       if (allResources.length < 3) {
         setProgress(70);
@@ -95,44 +95,44 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
           setLoadingText('Finalizing experience...');
           setProgress(100);
           setLoadingPhase('final');
-          
+
           setTimeout(() => {
             prepareForTransition();
           }, 1000);
         }, 1500);
         return;
       }
-      
+
       // For actual resources, process normally
       let loadedCount = 0;
       const checkResource = (resource: HTMLElement) => {
         loadedCount++;
         setResourcesLeft(prev => Math.max(0, prev - 1));
-        
+
         // Calculate progress based on resources loaded
         const newProgress = Math.min(95, Math.round((loadedCount / allResources.length) * 100));
         setProgress(newProgress);
-        
+
         console.log(`Resource ${loadedCount}/${allResources.length} loaded`);
-        
+
         if (loadedCount >= allResources.length) {
           setLoadingText('Finalizing experience...');
           setProgress(98);
           setTimeout(() => {
             setProgress(100);
             setLoadingPhase('final');
-            
+
             // Ensure minimum loading time has passed
             const elapsed = Date.now() - loadingStartTime.current;
             const remainingTime = Math.max(0, minLoadingTime - elapsed);
-            
+
             setTimeout(() => {
               prepareForTransition();
             }, remainingTime);
           }, 800);
         }
       };
-      
+
       // Check each resource with timeouts to ensure we don't get stuck
       allResources.forEach((resource, index) => {
         // Add staggered timeouts for each resource to avoid getting stuck on any single one
@@ -140,7 +140,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
           console.log(`Resource #${index} timed out - marking as loaded anyway`);
           checkResource(resource);
         }, 5000); // 5 second timeout per resource
-        
+
         if (resource.tagName.toLowerCase() === 'img') {
           const img = resource as HTMLImageElement;
           if (img.complete) {
@@ -173,12 +173,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
       }, 1000);
     }
   };
-  
+
   // Prepare the epic transition
   const prepareForTransition = () => {
     // Set a final dramatic pause before transition
     setLoadingText('Launching experience...');
-    
+
     setTimeout(() => {
       // Start the closing sequence
       setIsLoading(false);
@@ -187,25 +187,25 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
 
   // For dynamic futuristic quotes
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
-  
+
   // Extended loading delays and phases for a more dramatic experience
   useEffect(() => {
     let safetyTimeout: NodeJS.Timeout;
     let quoteInterval: NodeJS.Timeout;
     let phaseTimeouts: NodeJS.Timeout[] = [];
-    
+
     // Rotate through futuristic quotes for extra coolness - slower interval
     quoteInterval = setInterval(() => {
       setCurrentQuoteIndex(prev => (prev + 1) % futuristicQuotes.length);
       setLoadingText(futuristicQuotes[(currentQuoteIndex + 1) % futuristicQuotes.length]);
     }, 2800); // Longer quote display time
-    
+
     // Fase 1: Mulai dengan cepat tapi tetap keren
     phaseTimeouts.push(setTimeout(() => {
       setLoadingText("Initializing quantum processor...");
       setProgress(10);
     }, 500));
-    
+
     // Fase 2: Main loading phase start
     phaseTimeouts.push(setTimeout(() => {
       setLoadingPhase('main');
@@ -214,32 +214,32 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
       // Mulai cek resources segera untuk mempercepat loading
       checkAllResourcesLoaded();
     }, 1500));
-    
+
     // Fase 3: Fake resource checking start
     phaseTimeouts.push(setTimeout(() => {
       setProgress(60);
       setLoadingText("Calibrating holographic systems...");
     }, 3000));
-    
+
     // Fase 4: Getting "serious" - mendekati selesai
     phaseTimeouts.push(setTimeout(() => {
       setProgress(80);
       setLoadingText("Synchronizing quantum fluctuations...");
-      
+
       // Set a much shorter safety timeout to force completion after 7 seconds
       safetyTimeout = setTimeout(() => {
         console.log('Extended safety timeout triggered - forcing loading completion');
-        
+
         // Final countdown sequence
         setProgress(95);
         setLoadingText("Finalizing system initialization...");
-        
+
         // Final phase transition
         setTimeout(() => {
           setProgress(100);
           setLoadingPhase('final');
           setLoadingText("System online");
-          
+
           // Final dramatic pause before showing the app
           setTimeout(() => {
             setIsLoading(false);
@@ -247,7 +247,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
         }, 500);
       }, 7000); // 7 second safety timeout
     }, 5000));
-    
+
     // Simulate progress even if no resources are detected
     const interval = setInterval(() => {
       setProgress(prev => {
@@ -257,7 +257,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
         return Math.min(95, prev + increment);
       });
     }, 200);
-    
+
     return () => {
       clearInterval(interval);
       clearInterval(quoteInterval);
@@ -274,7 +274,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
     damping: 20,
     mass: 2,
   };
-  
+
   // Staggered letter animation for text reveal
   const letterVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -321,7 +321,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
               backgroundSize: '200% 200%',
             }}
           />
-          
+
           {/* Animated light beam */}
           <motion.div 
             className="absolute inset-0 overflow-hidden opacity-50 z-10 pointer-events-none"
@@ -343,7 +343,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
               }}
             />
           </motion.div>
-          
+
           <div className="w-full max-w-md px-4 z-20 relative">
             {/* Logo animation */}
             <motion.div
@@ -375,7 +375,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                       }}
                     />
                   ))}
-                  
+
                   {/* Holographic scan line */}
                   <motion.div 
                     className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-primary/80 to-transparent"
@@ -392,7 +392,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                     }}
                   />
                 </div>
-                
+
                 {/* Digital code rain effect behind text */}
                 <div className="absolute inset-0 overflow-hidden opacity-20 mix-blend-overlay">
                   {Array.from({ length: 15 }).map((_, index) => (
@@ -427,7 +427,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                     </motion.div>
                   ))}
                 </div>
-                
+
                 {/* Main logo text with holographic effect */}
                 <motion.h1 
                   className="text-5xl md:text-7xl font-orbitron font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary"
@@ -452,7 +452,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                 >
                   7Amazing
                 </motion.h1>
-                
+
                 {/* Glitch effect on text */}
                 <motion.div
                   className="absolute inset-0 flex items-center justify-center"
@@ -473,7 +473,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                   </div>
                 </motion.div>
               </div>
-              
+
               <motion.p 
                 className="text-foreground/70 font-medium text-lg"
                 initial={{ opacity: 0, y: 10 }}
@@ -492,7 +492,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                 )}
               </motion.p>
             </motion.div>
-            
+
             {/* Progressive loading bar with glow effect */}
             <motion.div 
               className="relative w-full h-2 bg-background/50 rounded-full overflow-hidden mb-6 border border-primary/20"
@@ -510,7 +510,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                 }}
               />
             </motion.div>
-            
+
             {/* Loading status text with animation */}
             <motion.div 
               className="flex justify-between items-center"
@@ -550,7 +550,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                 {Math.round(progress)}%
               </motion.p>
             </motion.div>
-            
+
             {/* Animated particles with glow effect */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
               {Array.from({ length: 30 }).map((_, index) => (
@@ -585,7 +585,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
               ))}
             </div>
           </div>
-          
+
           {/* Digital Code Rain Effect (Matrix style) */}
           <div className="absolute inset-0 z-0 overflow-hidden opacity-30">
             {Array.from({ length: 20 }).map((_, index) => (
@@ -616,7 +616,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
               </motion.div>
             ))}
           </div>
-          
+
           {/* Cosmic stars effect in background */}
           <div className="absolute inset-0 z-0">
             {Array.from({ length: 100 }).map((_, index) => (
@@ -644,7 +644,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
               />
             ))}
           </div>
-          
+
           {/* DNA Double Helix Animation - Futuristic Element */}
           <div className="absolute z-10 pointer-events-none" style={{ top: '15%', right: '10%' }}>
             <motion.div
@@ -655,7 +655,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
             >
               {/* DNA Strands */}
               {Array.from({ length: 10 }).map((_, index) => (
-                <React.Fragment key={`dna-${index}`}>
+                <div key={`dna-${index}`}>
                   <motion.div
                     className="absolute w-20 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
                     style={{
@@ -694,7 +694,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ minLoadingTime = 3000 }) 
                       delay: index * 0.1 + 1
                     }}
                   />
-                </React.Fragment>
+                </div>
               ))}
             </motion.div>
           </div>

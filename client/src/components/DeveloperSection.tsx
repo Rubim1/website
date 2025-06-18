@@ -25,7 +25,18 @@ const DeveloperSection: React.FC = () => {
     { platform: 'youtube', icon: 'fa-youtube', color: 'from-red-600 to-red-800', url: 'https://www.youtube.com/@itsbymz' }
   ];
 
-
+  // Dev habits/likes with progress
+  const devSkills = [
+    { name: 'Malas-malasan', progress: 50 },
+    { name: 'Nonton Anime', progress: 72 },
+    { name: 'Baca Manga/Manwha/Manhua/Light Novel', progress: 84 },
+    { name: 'Gaming', progress: 88 },
+    { name: 'Tidur', progress: 40 },
+    { name: 'Experiment', progress: 61 },
+    { name: 'Belajar (kalo butuh)', progress: 85 },
+    { name: 'Researching', progress: 79 },
+    { name: 'Nonton/Scrolling YouTube/TikTok/Film/Instagram', progress: 80 }
+  ];
 
   // Typing effect
   useEffect(() => {
@@ -51,7 +62,7 @@ const DeveloperSection: React.FC = () => {
     if (canvasRef.current) {
       const container = canvasRef.current;
       const scene = new THREE.Scene();
-      
+
       const camera = new THREE.PerspectiveCamera(
         75, 
         container.clientWidth / container.clientHeight, 
@@ -59,26 +70,26 @@ const DeveloperSection: React.FC = () => {
         1000
       );
       camera.position.z = 50;
-      
+
       const renderer = new THREE.WebGLRenderer({ 
         alpha: true,
         antialias: true
       });
       renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(renderer.domElement);
-      
+
       // Create particles
       const particlesGeometry = new THREE.BufferGeometry();
       const particlesCount = 2000;
-      
+
       const posArray = new Float32Array(particlesCount * 3);
-      
+
       for(let i = 0; i < particlesCount * 3; i++) {
         posArray[i] = (Math.random() - 0.5) * 80;
       }
-      
+
       particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-      
+
       // Multiple particle groups with different colors
       const createParticleGroup = (color: number, size: number, opacity: number) => {
         const material = new THREE.PointsMaterial({
@@ -90,56 +101,56 @@ const DeveloperSection: React.FC = () => {
         });
         return new THREE.Points(particlesGeometry, material);
       };
-      
+
       // Add different colored particle groups
       const particleGroups = [
         createParticleGroup(0x22d3ee, 0.2, 0.8), // Light blue
         createParticleGroup(0xffffff, 0.15, 0.5), // White
         createParticleGroup(0x3b82f6, 0.18, 0.6), // Blue
       ];
-      
+
       particleGroups.forEach(group => scene.add(group));
-      
+
       // Animation loop
       const animate = () => {
         requestAnimationFrame(animate);
-        
+
         particleGroups[0].rotation.x += 0.0002;
         particleGroups[0].rotation.y += 0.0003;
-        
+
         particleGroups[1].rotation.x -= 0.0003;
         particleGroups[1].rotation.z += 0.0002;
-        
+
         particleGroups[2].rotation.y += 0.0004;
         particleGroups[2].rotation.z -= 0.0002;
-        
+
         renderer.render(scene, camera);
       };
-      
+
       animate();
-      
+
       // Handle mouse movement for parallax effect
       const handleMouseMove = (event: MouseEvent) => {
         const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
         const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-        
+
         particleGroups.forEach((group, index) => {
           group.rotation.x += mouseY * 0.0003 * (index + 1);
           group.rotation.y += mouseX * 0.0003 * (index + 1);
         });
       };
-      
+
       window.addEventListener('mousemove', handleMouseMove);
-      
+
       // Handle resize
       const handleResize = () => {
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
       };
-      
+
       window.addEventListener('resize', handleResize);
-      
+
       // Cleanup
       return () => {
         if (container.contains(renderer.domElement)) {
@@ -155,12 +166,12 @@ const DeveloperSection: React.FC = () => {
   const handleImpactClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
     const rect = element.getBoundingClientRect();
-    
+
     // Create shockwave effect
     const shockwave = document.createElement('div');
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     shockwave.style.position = 'absolute';
     shockwave.style.left = `${x}px`;
     shockwave.style.top = `${y}px`;
@@ -172,9 +183,9 @@ const DeveloperSection: React.FC = () => {
     shockwave.style.boxShadow = '0 0 10px rgba(34, 211, 238, 0.5)';
     shockwave.style.zIndex = '10';
     shockwave.style.animation = 'ping 0.8s cubic-bezier(0, 0, 0.2, 1)';
-    
+
     element.appendChild(shockwave);
-    
+
     setTimeout(() => {
       element.removeChild(shockwave);
     }, 800);
@@ -187,15 +198,15 @@ const DeveloperSection: React.FC = () => {
         <div className="absolute inset-0 bg-black"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(34,211,238,0.1)_0%,_rgba(0,0,0,0.7)_70%,_rgba(0,0,0,1)_100%)]"></div>
       </div>
-      
+
       {/* Animated grid lines */}
       <div className="absolute inset-0 z-0 opacity-10">
         <div className="absolute inset-0 bg-grid-pattern"></div>
       </div>
-      
+
       {/* 3D Particle Container */}
       <div ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none"></div>
-      
+
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
         <motion.div 
@@ -215,7 +226,7 @@ const DeveloperSection: React.FC = () => {
             Enter the matrix where code transforms into digital experiences.
           </p>
         </motion.div>
-        
+
         {/* Developer Profiles */}
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 max-w-6xl mx-auto mb-16">
           {/* First Developer - @qinvibes */}
@@ -235,14 +246,14 @@ const DeveloperSection: React.FC = () => {
                 <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
               </div>
-              
+
               <div className="p-6 md:p-8 flex flex-col items-center">
                 {/* Profile Image with Aura */}
                 <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
                   {/* Image auras */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
-                  
+
                   {/* Actual image */}
                   <motion.div 
                     className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
@@ -257,7 +268,7 @@ const DeveloperSection: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   </motion.div>
                 </div>
-                
+
                 {/* Name and Title */}
                 <motion.h3 
                   className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
@@ -271,7 +282,7 @@ const DeveloperSection: React.FC = () => {
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
-                
+
                 <motion.p 
                   className="text-xl text-accent mb-6 text-center"
                   initial={{ opacity: 0 }}
@@ -281,7 +292,7 @@ const DeveloperSection: React.FC = () => {
                 >
                   Digital Management Class Journal Holder
                 </motion.p>
-                
+
                 {/* Description */}
                 <div className="h-24 mb-6">
                   <motion.p 
@@ -294,10 +305,10 @@ const DeveloperSection: React.FC = () => {
                     just vibes & sunsets
                   </motion.p>
                 </div>
-                
+
                 {/* Placeholder for spacing */}
                 <div className="mb-8"></div>
-                
+
                 {/* Journal Button */}
                 <motion.a 
                   href="#"
@@ -332,14 +343,14 @@ const DeveloperSection: React.FC = () => {
                 <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
               </div>
-              
+
               <div className="p-6 md:p-8 flex flex-col items-center">
                 {/* Profile Image with Aura */}
                 <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
                   {/* Image auras */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
-                  
+
                   {/* Actual image */}
                   <motion.div 
                     className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
@@ -354,7 +365,7 @@ const DeveloperSection: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   </motion.div>
                 </div>
-                
+
                 {/* Name and Title */}
                 <motion.h3 
                   className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
@@ -364,11 +375,11 @@ const DeveloperSection: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   <span className="relative">
-                    Itsbymz(rubim)
+                    Itsbymz
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
-                
+
                 <motion.p 
                   className="text-xl text-accent mb-6 text-center"
                   initial={{ opacity: 0 }}
@@ -378,7 +389,7 @@ const DeveloperSection: React.FC = () => {
                 >
                   Website Owner
                 </motion.p>
-                
+
                 {/* Description with typing effect */}
                 <div className="h-24 mb-6">
                   <motion.p 
@@ -392,7 +403,7 @@ const DeveloperSection: React.FC = () => {
                     <span className="inline-block w-1 h-4 bg-accent ml-1 animate-pulse"></span>
                   </motion.p>
                 </div>
-                
+
                 {/* Social Media Links */}
                 <motion.div 
                   className="flex justify-center gap-4 w-full mb-8"
@@ -420,7 +431,7 @@ const DeveloperSection: React.FC = () => {
                     </motion.a>
                   ))}
                 </motion.div>
-                
+
                 {/* Resume Button */}
                 <motion.a 
                   href="#"
@@ -437,7 +448,7 @@ const DeveloperSection: React.FC = () => {
               </div>
             </div>
           </motion.div>
-          
+
           {/* Third Developer - nanashii */}
           <motion.div 
             className="lg:col-span-2 relative"
@@ -455,14 +466,14 @@ const DeveloperSection: React.FC = () => {
                 <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
                 <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
               </div>
-              
+
               <div className="p-6 md:p-8 flex flex-col items-center">
                 {/* Profile Image with Aura */}
                 <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
                   {/* Image auras */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
-                  
+
                   {/* Actual image */}
                   <motion.div 
                     className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
@@ -477,7 +488,7 @@ const DeveloperSection: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   </motion.div>
                 </div>
-                
+
                 {/* Name and Title */}
                 <motion.h3 
                   className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
@@ -491,7 +502,7 @@ const DeveloperSection: React.FC = () => {
                     <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
                   </span>
                 </motion.h3>
-                
+
                 <motion.p 
                   className="text-xl text-accent mb-6 text-center"
                   initial={{ opacity: 0 }}
@@ -501,7 +512,7 @@ const DeveloperSection: React.FC = () => {
                 >
                   Digital Management Finance Holder
                 </motion.p>
-                
+
                 {/* Description */}
                 <div className="h-24 mb-6">
                   <motion.p 
@@ -514,10 +525,10 @@ const DeveloperSection: React.FC = () => {
                     mulfand
                   </motion.p>
                 </div>
-                
+
                 {/* Placeholder for spacing */}
                 <div className="mb-8"></div>
-                
+
                 {/* Finance Button */}
                 <motion.a 
                   href="#"
@@ -534,7 +545,7 @@ const DeveloperSection: React.FC = () => {
               </div>
             </div>
           </motion.div>
-          
+
           {/* Right Column - Skills and Projects */}
           <motion.div 
             className="lg:col-span-3"
@@ -543,14 +554,13 @@ const DeveloperSection: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-
             {/* 3D Canvas Animation Section */}
             <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8">
               <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center">
                 <i className="fas fa-cube text-accent mr-3"></i>
                 <span>Interactive Space</span>
               </h3>
-              
+
               <div className="aspect-video w-full bg-black/80 rounded-lg border border-accent/10 relative overflow-hidden frame-impact" onClick={handleImpactClick}>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div 
@@ -568,7 +578,7 @@ const DeveloperSection: React.FC = () => {
                     7
                   </motion.div>
                 </div>
-                
+
                 <div className="absolute inset-0">
                   {Array.from({ length: 20 }).map((_, index) => (
                     <motion.div
@@ -594,7 +604,7 @@ const DeveloperSection: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="mt-6 flex justify-center">
                 <div className="inline-block text-center bg-black/40 px-6 py-3 rounded-lg border border-accent/10">
                   <p className="text-white">Hover and click around to interact with particles</p>

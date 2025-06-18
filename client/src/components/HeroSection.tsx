@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import * as ReactDOM from 'react-dom/client';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme3D } from '@/contexts/Theme3DContext';
@@ -7,10 +6,17 @@ import { useToast } from '@/hooks/use-toast';
 
 // Define custom elements for TypeScript
 declare global {
+  interface Window {
+    splineViewerReady?: boolean;
+  }
+  
   namespace JSX {
     interface IntrinsicElements {
       'spline-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         url?: string;
+        'loading-anim'?: string;
+        'events-target'?: string;
+        'auto-reload'?: string;
       };
     }
   }
@@ -100,49 +106,78 @@ const HeroSection: React.FC = () => {
     };
   }, []);
   
-  // Handle 3D toggle with custom dialog
+  // For direct toggle without dialog, uncomment this line
   const handleToggle3D = () => {
     if (enable3D) {
       // If 3D is already enabled, just turn it off
       toggleEnable3D();
-      
-      // Show toast notification when 3D is disabled
-      toast({
-        title: "3D Effects Disabled",
-        description: (
-          <div className="flex items-start space-x-2">
-            <i className="fas fa-cube mt-0.5 text-gray-400"></i>
-            <span>3D effects have been turned off. You can enable them again at any time.</span>
-          </div>
-        ),
-        duration: 3000,
-      });
     } else {
-      // If 3D is disabled, show custom dialog
-      setConfirmDialogOpen(true);
+      // If 3D is disabled, show confirmation
+      if (window.confirm('Enable 3D effects? This may affect performance on low-end devices.')) {
+        toggleEnable3D();
+      }
     }
   };
 
-  // Show performance notification toast for all devices
+  // Effect to handle Spline viewer initialization
+  useEffect(() => {
+    if (!enable3D) return;
+    
+    let splineTimeout: ReturnType<typeof setTimeout>;
+    
+    const handleSplineReady = () => {
+      console.log("Spline viewer is ready");
+      
+      const splineEl = document.querySelector('spline-viewer');
+      if (splineEl) {
+        // Ensure spline viewer is properly styled
+        const splineViewer = splineEl as HTMLElement;
+        splineViewer.style.width = '100%';
+        splineViewer.style.height = '100%';
+        splineViewer.style.position = 'absolute';
+        splineViewer.style.top = '0';
+        splineViewer.style.left = '0';
+      }
+    };
+    
+    // Listen for spline viewer ready event
+    window.addEventListener('spline-viewer-ready', handleSplineReady);
+    
+    // If Spline is already ready, handle it immediately
+    if (window.splineViewerReady) {
+      handleSplineReady();
+    } else {
+      // Set a timeout to check if Spline loads
+      splineTimeout = setTimeout(() => {
+        const splineEl = document.querySelector('spline-viewer');
+        if (splineEl) {
+          handleSplineReady();
+        }
+      }, 2000);
+    }
+
+    return () => {
+      window.removeEventListener('spline-viewer-ready', handleSplineReady);
+      clearTimeout(splineTimeout);
+    };
+  }, [enable3D]);
+
+  // Show performance notification toast
   useEffect(() => {
     // Show a performance toast notification after a delay
     const timeoutId = setTimeout(() => {
-      // Different messages for mobile vs desktop
-      const title = isMobileDevice ? "3D Effects Now Available on Mobile" : "3D Effects Available";
-      const description = isMobileDevice 
-        ? "You can now toggle 3D effects on your mobile device using the button in the bottom left corner. Note that it may use more battery and run slower."
-        : "Enable 3D effects for a more immersive experience. Use the toggle in the bottom left corner. May affect performance on low-end devices.";
-      
-      toast({
-        title: title,
-        description: (
-          <div className="flex items-start space-x-2">
-            <i className="fas fa-cube mt-0.5 text-primary"></i>
-            <span>{description}</span>
-          </div>
-        ),
-        duration: 8000,
-      });
+      if (!isMobileDevice) {
+        toast({
+          title: "3D Effects Available",
+          description: (
+            <div className="flex items-start space-x-2">
+              <i className="fas fa-cube mt-0.5 text-primary"></i>
+              <span>Enable 3D effects for a more immersive experience. Use the toggle in the bottom left corner. May affect performance on low-end devices.</span>
+            </div>
+          ),
+          duration: 8000,
+        });
+      }
     }, 5000);
     
     return () => clearTimeout(timeoutId);
@@ -166,124 +201,49 @@ const HeroSection: React.FC = () => {
     <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24">
       {/* Custom 3D Activation Confirmation Dialog */}
       {confirmDialogOpen && (
-        <motion.div 
-          className="fixed inset-0 flex items-center justify-center z-[100]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        >
-          <motion.div 
+        <div className="fixed inset-0 flex items-center justify-center z-[100]">
+          <div 
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setConfirmDialogOpen(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          ></motion.div>
-          
-          <motion.div 
-            className="relative bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl border border-[#00b8ff]/30 rounded-xl w-full max-w-md mx-4 p-6 z-[101] shadow-[0_0_25px_rgba(0,184,255,0.2)]"
-            initial={{ scale: 0.9, y: 20, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            {/* Dialog header with animated icon */}
-            <div className="flex items-center gap-3 mb-5 border-b border-gray-700/50 pb-4">
-              <motion.div
-                className="relative w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#00b8ff]/20 to-[#00b8ff]/5"
-                animate={{ 
-                  boxShadow: [
-                    '0 0 0 rgba(0, 184, 255, 0.3)', 
-                    '0 0 15px rgba(0, 184, 255, 0.5)', 
-                    '0 0 0 rgba(0, 184, 255, 0.3)'
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <motion.i 
-                  className="fas fa-cube text-[#00b8ff] text-xl"
-                  animate={{ 
-                    rotateY: [0, 180, 360],
-                    scale: [1, 1.1, 1] 
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                ></motion.i>
-              </motion.div>
-              <h3 className="text-white text-xl font-medium">
-                <span className="text-[#00b8ff]">3D</span> Mode
-                <span className="block text-sm font-normal text-gray-400 mt-1">Enhanced visual experience</span>
-              </h3>
+          ></div>
+          <div className="relative bg-black/90 backdrop-blur-lg border border-primary/30 rounded-lg w-full max-w-md mx-4 p-6 z-[101] shadow-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <i className="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+              <h3 className="text-white text-xl font-medium">Enable 3D Effects?</h3>
             </div>
             
-            {/* Dialog content - mobile specific */}
-            <div className="text-gray-300 mb-6 space-y-4">
-              <motion.div 
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="mt-1 text-[#00b8ff]"><i className="fas fa-sparkles"></i></div>
-                <div>
-                  <h4 className="font-medium text-white">Immersive Experience</h4>
-                  <p className="text-sm text-gray-400">Enjoy an interactive 3D background for a more engaging visual experience</p>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="mt-1 text-yellow-400"><i className="fas fa-battery-half"></i></div>
-                <div>
-                  <h4 className="font-medium text-white">Battery Usage</h4>
-                  <p className="text-sm text-gray-400">3D mode uses more resources and may affect battery life on mobile devices</p>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="bg-gradient-to-r from-blue-900/20 to-blue-800/10 border border-[#00b8ff]/20 rounded-lg p-4 mt-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <div className="flex items-start gap-2 text-[#00b8ff]">
-                  <i className="fas fa-lightbulb mt-1"></i>
-                  <p className="text-sm">
-                    You can toggle 3D mode off at any time by clicking the same button again
-                  </p>
-                </div>
-              </motion.div>
+            <div className="text-gray-300 mb-6">
+              <p className="mb-3">
+                3D effects can provide a more immersive experience but may affect performance on low-end devices.
+              </p>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-md p-3 text-yellow-300 text-sm">
+                <p className="flex items-start">
+                  <i className="fas fa-lightbulb mt-1 mr-2"></i>
+                  <span>If you experience lag or slow performance, you can disable 3D effects by clicking the same button again.</span>
+                </p>
+              </div>
             </div>
             
-            {/* Dialog actions */}
             <div className="flex justify-end gap-3">
-              <motion.button 
-                className="px-4 py-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/90 border border-gray-700/50 text-white transition-colors"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+              <button 
+                className="px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white transition-colors"
                 onClick={() => setConfirmDialogOpen(false)}
               >
-                <i className="fas fa-times mr-2 opacity-70"></i>
                 Cancel
-              </motion.button>
-              
-              <motion.button 
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#00b8ff] to-[#0090cc] hover:from-[#00a0e0] hover:to-[#0080b5] text-white shadow-lg shadow-[#00b8ff]/20 transition-all"
-                whileHover={{ scale: 1.03, boxShadow: '0 0 15px rgba(0, 184, 255, 0.4)' }}
-                whileTap={{ scale: 0.97 }}
+              </button>
+              <button 
+                className="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 hover:from-blue-700 hover:via-blue-500 hover:to-blue-900 text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                 onClick={() => {
                   toggleEnable3D();
                   setConfirmDialogOpen(false);
                 }}
               >
                 <i className="fas fa-cube mr-2"></i>
-                Enable 3D Mode
-              </motion.button>
+                Enable 3D
+              </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
       {/* Background with parallax */}
       <div 
@@ -296,8 +256,8 @@ const HeroSection: React.FC = () => {
       
       {/* 3D Spline background */}
       {enable3D && (
-        <div className="absolute inset-0 z-[1]">
-          <spline-viewer url="https://prod.spline.design/qPE6oRVlTRz9CSJW/scene.splinecode"></spline-viewer>
+        <div className="absolute inset-0 z-[1]" id="spline-3d-container">
+          <spline-viewer url="https://prod.spline.design/UJHhKmvjyDbZ4xzN/scene.splinecode"></spline-viewer>
         </div>
       )}
       
@@ -358,29 +318,6 @@ const HeroSection: React.FC = () => {
         >
           <div className="relative mb-6">
             {/* Ultra-premium title with layered effects */}
-            {/* Alternative 3D Toggle Button In Main Content */}
-            <motion.div
-              className="mb-4 flex justify-center"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
-            >
-              <button
-                id="main-3d-toggle"
-                onClick={handleToggle3D}
-                className={`px-4 py-2 rounded-lg text-sm transition-all ${
-                  enable3D 
-                    ? 'bg-gradient-to-r from-[#00b8ff] to-[#0090cc] text-white shadow-lg shadow-[#00b8ff]/20' 
-                    : 'bg-gray-800/60 backdrop-blur-sm text-gray-300 border border-gray-700/50'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <i className={`fas ${enable3D ? 'fa-cube' : 'fa-cube'} ${enable3D ? 'text-white' : 'text-gray-400'}`}></i>
-                  <span className="font-medium">{enable3D ? 'Disable 3D Mode' : 'Enable 3D Mode'}</span>
-                </div>
-              </button>
-            </motion.div>
-            
             <motion.h1 
               className="text-6xl md:text-8xl font-bold relative inline-block"
               initial={{ opacity: 0, y: -30 }}
@@ -390,30 +327,23 @@ const HeroSection: React.FC = () => {
                 ease: "easeOut"
               }}
             >
-              {/* Background 3D text effect */}
-              <span className="absolute -left-1 -top-1 opacity-20 blur-sm text-[#80d8ff]">7</span>
-              <span className="absolute -left-0.5 -top-0.5 opacity-30 blur-[1px] text-[#00b8ff]">7</span>
+              {/* Normal styled 7 */}
+              <div className="relative inline-block mr-4">
+                <motion.span 
+                  className="text-8xl md:text-9xl font-bold bg-gradient-to-br from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  style={{ 
+                    filter: "drop-shadow(0 0 15px rgba(59, 130, 246, 0.6))",
+                    fontFamily: "Arial, sans-serif"
+                  }}
+                >
+                  7
+                </motion.span>
+              </div>
               
-              {/* Main number with premium effect */}
-              <motion.span 
-                className="relative z-10 mr-1 text-transparent bg-clip-text bg-gradient-to-r from-[#00b8ff] to-[#80d8ff]"
-                animate={{ 
-                  textShadow: [
-                    "0 0 10px rgba(0, 191, 255, 0.5), 0 0 20px rgba(0, 191, 255, 0.3)", 
-                    "0 0 15px rgba(0, 191, 255, 0.7), 0 0 30px rgba(0, 191, 255, 0.5)", 
-                    "0 0 10px rgba(0, 191, 255, 0.5), 0 0 20px rgba(0, 191, 255, 0.3)"
-                  ]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  repeatType: "mirror" 
-                }}
-              >
-                7
-              </motion.span>
-              
-              {/* "AMAZING" text with animated gradient */}
+              {/* "MAZING" text with animated gradient */}
               <motion.span 
                 className="modern-gradient-text relative z-10"
                 initial={{ opacity: 0, filter: "blur(8px)" }}
@@ -423,15 +353,15 @@ const HeroSection: React.FC = () => {
                 }}
                 transition={{ 
                   duration: 1.2,
-                  delay: 0.3
+                  delay: 1.2
                 }}
               >
-                AMAZING
+                MAZING
               </motion.span>
               
               {/* Animated highlight underline */}
               <motion.span 
-                className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-[#00b8ff] to-[#80d8ff] rounded-full"
+                className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-blue-600 via-blue-300 to-blue-900 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ 
@@ -458,7 +388,7 @@ const HeroSection: React.FC = () => {
             
             {/* Small decorative elements */}
             <motion.span 
-              className="absolute -top-6 -right-6 text-[#00b8ff] opacity-60 text-lg"
+              className="absolute -top-6 -right-6 text-blue-500 opacity-60 text-lg"
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             >
@@ -526,25 +456,25 @@ const HeroSection: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.2 + item.delay }}
               whileHover={{ 
                 y: -8,
-                boxShadow: "0 0 25px rgba(0, 191, 255, 0.4)",
-                borderColor: "rgba(0, 191, 255, 0.6)"
+                boxShadow: "0 0 25px rgba(59, 130, 246, 0.4)",
+                borderColor: "rgba(59, 130, 246, 0.6)"
               }}
             >
               {/* Static background glow for better performance */}
               <div 
-                className="absolute inset-0 bg-gradient-to-br from-[#00b8ff]/20 to-[#80d8ff]/10 z-0 opacity-30"
+                className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-blue-300/10 to-blue-900/20 z-0 opacity-30"
               />
               
               {/* Top corner accent */}
               <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
-                <div className="absolute rotate-45 bg-[#00b8ff]/20 w-24 h-8 -top-4 -right-8 backdrop-blur-sm"></div>
+                <div className="absolute rotate-45 bg-gradient-to-r from-blue-500/20 to-blue-300/20 w-24 h-8 -top-4 -right-8 backdrop-blur-sm"></div>
               </div>
               
               <div className="relative z-10 p-6">
                 {/* Icon with static glow for better performance */}
                 <div 
-                  className="w-16 h-16 rounded-full bg-[#00b8ff]/10 flex items-center justify-center text-3xl text-[#00b8ff] mb-4 border border-[#00b8ff]/30 hover:scale-110 transition-all duration-300"
-                  style={{ boxShadow: '0 0 8px rgba(0, 191, 255, 0.4)' }}
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/10 via-blue-300/10 to-blue-900/10 flex items-center justify-center text-3xl text-blue-400 mb-4 border border-blue-500/30 hover:scale-110 transition-all duration-300"
+                  style={{ boxShadow: '0 0 8px rgba(59, 130, 246, 0.4)' }}
                 >
                   <i className={`fas ${item.icon}`}></i>
                 </div>
@@ -562,7 +492,7 @@ const HeroSection: React.FC = () => {
                   whileTap={{ scale: 0.95 }}
                 >
                   {/* Button background with gradient */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-[#00b8ff] to-[#80d8ff] rounded-lg opacity-90 group-hover:opacity-100 transition-opacity"></span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-lg opacity-90 group-hover:opacity-100 transition-opacity"></span>
                   
                   {/* Button content */}
                   <span className="relative px-6 py-2.5 text-white font-medium flex items-center space-x-1">
@@ -578,7 +508,7 @@ const HeroSection: React.FC = () => {
                 
                 {/* Static bottom accent line */}
                 <div 
-                  className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-[#00b8ff]/0 via-[#00b8ff]/30 to-[#00b8ff]/0"
+                  className="absolute bottom-0 left-0 h-0.5 w-full bg-gradient-to-r from-blue-600/0 via-blue-400/30 to-blue-800/0"
                 />
               </div>
             </motion.div>
@@ -597,12 +527,12 @@ const HeroSection: React.FC = () => {
             whileTap={{ scale: 0.95 }}
           >
             {/* Glow effect behind button */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#00b8ff]/40 to-[#80d8ff]/40 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition duration-1000"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/40 via-blue-300/40 to-blue-900/40 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition duration-1000"></div>
             
             {/* Button with glass effect */}
             <a 
               href="#gallery" 
-              className="relative inline-flex items-center justify-center min-w-[220px] bg-gradient-to-r from-[#00b8ff] to-[#80d8ff] text-white font-semibold py-4 px-10 rounded-xl text-lg border border-[#80d8ff]/50 shadow-xl"
+              className="relative inline-flex items-center justify-center min-w-[220px] bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 text-white font-semibold py-4 px-10 rounded-xl text-lg border border-blue-400/50 shadow-xl"
             >
               <span className="relative z-10 flex items-center">
                 <span className="mr-2">Explore Our Gallery</span>
@@ -656,224 +586,125 @@ const HeroSection: React.FC = () => {
           </motion.div>
         </motion.div>
         
-        {/* 3D Toggle Button - Specially enhanced for better mobile touch - MOVED LOWER */}
+        {/* 3D Toggle Button */}
         <motion.div 
-          className="fixed bottom-6 left-6 z-50 select-none"
+          className="fixed bottom-6 left-6 z-50"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 2, duration: 0.5 }}
         >
-          {/* Use a div with onClick instead of a button for better mobile compatibility */}
-          <div 
-            role="button"
-            aria-label={enable3D ? "Turn off 3D background" : "Turn on 3D background"}
-            className="relative group touch-manipulation cursor-pointer"
+          <motion.button 
+            className="relative group"
             onClick={handleToggle3D}
-            onTouchEnd={(e) => {
-              e.preventDefault(); // Prevent ghost clicks
-              handleToggle3D();
-            }}
-            style={{ touchAction: 'manipulation' }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            title={enable3D ? "Turn off 3D background" : "Turn on 3D background"}
+            disabled={isMobileDevice}
           >
-            {/* Extremely large invisible touch target especially for mobile */}
-            <div className="absolute -inset-16 md:-inset-8 cursor-pointer z-10"></div>
-            
-            {/* Button glow effect */}
-            <motion.div 
-              className={`absolute inset-0 rounded-xl blur-md ${enable3D ? 'bg-[#00b8ff]/30' : 'bg-gray-400/10'}`}
-              animate={{ 
-                scale: [0.85, 1.15, 0.85],
-                opacity: [0.4, 0.6, 0.4] 
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            
-            {/* Button actual background */}
-            <div className={`relative w-14 h-14 rounded-xl shadow-lg backdrop-blur-md p-[2px] ${
-              enable3D 
-              ? 'bg-gradient-to-br from-[#00b8ff]/90 to-[#80d8ff]/70 shadow-[#00b8ff]/20' 
-              : 'bg-gradient-to-br from-gray-700/60 to-gray-800/50'
-            }`}>
-              <div className={`absolute inset-[1px] rounded-xl backdrop-blur-md flex items-center justify-center ${
-                enable3D ? 'bg-[#001520]/70' : 'bg-[#001520]/90'
-              }`}>
-                
-                {/* On/Off text indicator */}
-                <div className="absolute -bottom-7 text-center w-full">
-                  <span className={`text-xs font-semibold tracking-wide ${
-                    enable3D ? 'text-[#00b8ff]' : 'text-gray-500'
-                  }`}>
-                    {enable3D ? '3D ON' : '3D OFF'}
-                  </span>
-                </div>
-                
-                {/* Icon with animation */}
-                <motion.div
-                  animate={enable3D ? {
-                    rotateY: [0, 180, 360],
-                    scale: [1, 1.1, 1],
-                  } : {}}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="flex items-center justify-center"
-                >
-                  <i className={`fas ${enable3D ? 'fa-cube text-xl' : 'fa-cube text-lg'} ${
-                    enable3D ? 'text-[#00b8ff]' : 'text-gray-400'
-                  }`}></i>
-                </motion.div>
+            {/* Button background */}
+            <div className={`relative w-14 h-14 rounded-full backdrop-blur-md p-[2px] ${isMobileDevice ? 'opacity-50 cursor-not-allowed' : ''} ${enable3D ? 'bg-gradient-to-br from-blue-600/80 via-blue-400/70 to-blue-800/60' : 'bg-gradient-to-br from-gray-500/40 to-gray-600/30'}`}>
+              <div className="absolute inset-[1px] rounded-full bg-black/80 backdrop-blur-md" />
+              
+              {/* Icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <i className={`fas ${enable3D ? 'fa-cube' : 'fa-square'} ${enable3D ? 'text-blue-400' : 'text-gray-400'}`}></i>
               </div>
             </div>
-            
-            {/* Pulse effect for when 3D is enabled */}
-            {enable3D && (
-              <motion.div
-                className="absolute -inset-2 rounded-full opacity-0 border-2 border-[#00b8ff]/30"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0, 0.5, 0]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeOut"
-                }}
-              />
-            )}
-          </div>
+          </motion.button>
         </motion.div>
         
-        {/* Premium Music player toggle - Enhanced for mobile - MOVED LOWER */}
+        {/* Premium Music player toggle */}
         <motion.div 
-          className="fixed bottom-6 right-6 z-50 select-none"
+          className="fixed bottom-6 right-6 z-50"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 2, duration: 0.5 }}
         >
-          <div 
-            role="button"
-            aria-label="Toggle Music Player"
-            className="relative group touch-manipulation cursor-pointer"
+          <motion.button 
+            className="relative group"
             onClick={() => {
-              // Simple approach - just toggle the class on the audio player
-              const audioPlayer = document.querySelector('.audio-player');
-              if (audioPlayer) {
-                // If player has minimized class, remove it, otherwise add it
-                if (audioPlayer.classList.contains('minimized')) {
-                  audioPlayer.classList.remove('minimized');
-                  console.log("Music player expanded");
-                } else {
-                  audioPlayer.classList.add('minimized');
-                  console.log("Music player minimized");
-                }
-              } else {
-                console.log("Audio player not found in DOM");
-              }
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault(); // Prevent ghost clicks
-              // Toggle the music player
-              const audioPlayer = document.querySelector('.audio-player');
+              const audioPlayer = document.querySelector('.audio-player') as HTMLElement;
               if (audioPlayer) {
                 if (audioPlayer.classList.contains('minimized')) {
                   audioPlayer.classList.remove('minimized');
                 } else {
-                  audioPlayer.classList.add('minimized');
+                  audioPlayer.style.display = audioPlayer.style.display === 'none' ? 'block' : 'none';
                 }
               }
             }}
-            style={{ touchAction: 'manipulation' }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
-            {/* Extremely large invisible touch target especially for mobile */}
-            <div className="absolute -inset-16 md:-inset-8 cursor-pointer z-10"></div>
-            
-            {/* Button glow effect */}
+            {/* Glowing background */}
             <motion.div 
-              className="absolute inset-0 rounded-xl blur-md bg-[#00b8ff]/30"
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/20 via-blue-300/20 to-blue-900/20 blur-xl"
               animate={{ 
-                scale: [0.85, 1.15, 0.85],
-                opacity: [0.4, 0.6, 0.4] 
+                scale: [0.85, 1.1, 0.85],
+                opacity: [0.4, 0.7, 0.4] 
               }}
-              transition={{
+              transition={{ 
                 duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
             />
             
-            {/* Button actual background */}
-            <div className="relative w-14 h-14 rounded-xl shadow-lg bg-gradient-to-br from-[#00b8ff]/90 to-[#80d8ff]/70 shadow-[#00b8ff]/20 backdrop-blur-md p-[2px]">
-              <div className="absolute inset-[1px] rounded-xl bg-[#001520]/70 backdrop-blur-md flex items-center justify-center">
-                
-                {/* On/Off text indicator */}
-                <div className="absolute -bottom-7 text-center w-full">
-                  <span className="text-xs font-semibold tracking-wide text-[#00b8ff]">MUSIC</span>
-                </div>
-                
-                {/* Icon with animation */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="flex items-center justify-center"
-                >
-                  <motion.i 
-                    className="fas fa-music text-xl text-[#00b8ff]"
-                    animate={{
-                      rotate: [0, 5, 0, -5, 0],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </motion.div>
-              </div>
-            </div>
-            
-            {/* Shine effect */}
-            <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <motion.div
-                className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/30 to-transparent"
-                style={{ rotate: -30 }}
-                animate={{ 
-                  x: ['-100%', '100%'] 
-                }}
-                transition={{ 
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: "easeInOut"
-                }}
-              />
-            </div>
-            
-            {/* Pulse effect */}
-            <motion.div
-              className="absolute -inset-2 rounded-full opacity-0 border-2 border-[#00b8ff]/30"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0, 0.5, 0]
+            {/* Ripple effects */}
+            <motion.div 
+              className="absolute inset-0 rounded-full border-2 border-blue-400/20"
+              animate={{ 
+                scale: [1, 1.4, 1.8, 1],
+                opacity: [0.5, 0.3, 0, 0.5]
               }}
-              transition={{
+              transition={{ 
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeOut"
               }}
             />
-          </div>
+            
+            {/* Button background */}
+            <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-blue-600/80 via-blue-400/70 to-blue-800/60 backdrop-blur-md p-[2px]">
+              <div className="absolute inset-[1px] rounded-full bg-black/80 backdrop-blur-md" />
+              
+              {/* Icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.i 
+                  className="fas fa-music text-blue-400"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    textShadow: [
+                      '0 0 4px rgba(0, 184, 255, 0.6)',
+                      '0 0 8px rgba(0, 184, 255, 0.8)',
+                      '0 0 4px rgba(0, 184, 255, 0.6)'
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+              
+              {/* Shine effect */}
+              <div className="absolute inset-0 rounded-full overflow-hidden">
+                <motion.div
+                  className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/30 to-transparent"
+                  style={{ rotate: -30 }}
+                  animate={{ 
+                    x: ['-100%', '100%'] 
+                  }}
+                  transition={{ 
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 3,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+            </div>
+          </motion.button>
         </motion.div>
       </div>
       

@@ -99,7 +99,7 @@ const getEventColor = (type: string) => {
     case "school":
       return "bg-yellow-500";
     case "class":
-      return "bg-blue-500";
+      return "bg-gradient-to-r from-blue-600 to-blue-800";
     case "personal":
       return "bg-green-500";
     default:

@@ -25,19 +25,30 @@ function Router() {
 }
 
 function App() {
-  // Import MusicPlayer directly
-  const [MusicPlayer, setMusicPlayer] = useState<React.ComponentType | null>(null);
+  const [musicPlayerInstance, setMusicPlayerInstance] = useState<JSX.Element | null>(null);
+  const playerInitializedRef = useRef(false);
   
-  // Load the music player component
+  // Ensure only one MusicPlayer instance is created
   useEffect(() => {
-    // Import the component
-    import("@/components/MusicPlayer").then((module) => {
-      setMusicPlayer(() => module.default);
-      window.musicPlayerActive = true;
-      console.log("Music player initialized and ready to use");
-    }).catch(err => {
-      console.error("Failed to load music player:", err);
-    });
+    // Ensure we only initialize the player once ever
+    if (playerInitializedRef.current) {
+      return;
+    }
+    
+    playerInitializedRef.current = true;
+    
+    // Use a slight delay to ensure we don't create multiple instances
+    setTimeout(() => {
+      if (!window.hasOwnProperty('musicPlayerActive') || window.musicPlayerActive !== true) {
+        import("@/components/MusicPlayer").then((module) => {
+          const MusicPlayer = module.default;
+          setMusicPlayerInstance(<MusicPlayer />);
+          console.log("Music player initialized");
+        });
+      } else {
+        console.log("Music player already exists, not creating another");
+      }
+    }, 1000);
   }, []);
 
   return (
@@ -47,7 +58,7 @@ function App() {
           <LoadingScreen />
           <SmoothScroll>
             <Router />
-            {MusicPlayer && <MusicPlayer />}
+            {musicPlayerInstance}
             <Toaster />
           </SmoothScroll>
         </AppProvider>
