@@ -176,57 +176,82 @@ const ChatSection: React.FC = () => {
     setIsGitHubPages(true);
     setIsWebSocketConnected(true);
     
-    // Skip authentication step and immediately show login modal
-    if (savedName && savedPhoto) {
-      // Use saved data for direct display without waiting for Firebase auth
-      console.log('Using saved credentials');
-      setUserProfile({
-        name: savedName,
-        photoUrl: savedPhoto
-      });
-      setShowChatSection(true);
-      
-      // Try login in background
-      loginAnonymously(savedName, savedPhoto).catch(err => {
-        console.error('Background login failed:', err);
-        // It's ok, we'll continue with local data
-      });
-    } else {
-      // Show the profile modal to get user info
-      setProfileModalOpen(true);
-    }
+    // Initialize Firebase authentication
+    const initializeChat = async () => {
+      try {
+        if (savedName && savedPhoto) {
+          console.log('Initializing chat with saved credentials');
+          setUserProfile({
+            name: savedName,
+            photoUrl: savedPhoto
+          });
+          setShowChatSection(true);
+          
+          // Authenticate with Firebase in background
+          try {
+            await loginAnonymously(savedName, savedPhoto);
+            console.log('Firebase authentication successful');
+          } catch (authError) {
+            console.warn('Firebase authentication failed, continuing with local profile:', authError);
+          }
+        } else {
+          // Show the profile modal to get user info
+          setProfileModalOpen(true);
+        }
+        
+        // Set up message listener
+        const unsubMessages = subscribeToMessages((messages) => {
+          const convertedMessages = messages.map(msg => ({
+            id: msg.id,
+            name: msg.name,
+            photoUrl: msg.photoUrl,
+            text: msg.text,
+            timestamp: new Date(msg.timestamp || Date.now()),
+            isDeleted: msg.isDeleted || false,
+            isImage: msg.isImage || false,
+            imageUrl: msg.imageUrl || ''
+          }));
+          console.log(`Loaded ${convertedMessages.length} messages from Firebase`);
+          setMessages(convertedMessages);
+        });
+        
+        // Set up typing indicator listener
+        const unsubscribeTyping = subscribeToTypingUsers((typingData) => {
+          const typingArray: TypingUser[] = Object.values(typingData).map((user: any) => ({
+            name: user.name,
+            photoUrl: user.photoUrl,
+            timestamp: new Date(user.timestamp || Date.now())
+          }));
+          setTypingUsers(typingArray);
+        });
+        
+        // Store cleanup functions
+        return () => {
+          unsubMessages();
+          unsubscribeTyping();
+        };
+        
+      } catch (error) {
+        console.error('Chat initialization error:', error);
+        setIsWebSocketConnected(false);
+        
+        // Show error toast
+        toast({
+          title: "Chat initialization failed",
+          description: "Please check your connection and try again",
+          variant: "destructive"
+        });
+      }
+    };
     
-    // Set up message listener - works even without login for read-only
-    const unsubMessages = subscribeToMessages((messages) => {
-      const convertedMessages = messages.map(msg => ({
-        id: msg.id,
-        name: msg.name,
-        photoUrl: msg.photoUrl,
-        text: msg.text,
-        timestamp: new Date(msg.timestamp || Date.now()),
-        isDeleted: msg.isDeleted || false,
-        isImage: msg.isImage || false,
-        imageUrl: msg.imageUrl || ''
-      }));
-      console.log(`Loaded ${convertedMessages.length} messages from Firebase`);
-      setMessages(convertedMessages);
-    });
+    // Initialize chat
+    const cleanup = initializeChat();
     
-    // Set up typing indicator listener
-    const unsubscribeTyping = subscribeToTypingUsers((typingData) => {
-      // Convert to array of TypingUser objects
-      const typingArray: TypingUser[] = Object.values(typingData).map((user: any) => ({
-        name: user.name,
-        photoUrl: user.photoUrl,
-        timestamp: new Date(user.timestamp || Date.now())
-      }));
-      setTypingUsers(typingArray);
-    });
-    
-    // Clean up
+    // Return cleanup function
     return () => {
-      unsubMessages();
-      unsubscribeTyping();
+      if (cleanup instanceof Promise) {
+        cleanup.then(cleanupFn => cleanupFn?.());
+      }
     };
   }, []);
 
@@ -431,43 +456,54 @@ const ChatSection: React.FC = () => {
 
   const handleSendMessage = async () => {
     // Validate message and user profile
-    if (!newMessage.trim() || !userProfile.name) return;
+    if (!newMessage.trim() || !userProfile.name) {
+      toast({
+        title: "Pesan kosong",
+        description: "Silakan masukkan pesan terlebih dahulu",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const messageText = newMessage.trim();
     setNewMessage('');
 
-    // Create message immediately for instant UI feedback
-    const localMessage: ChatMessage = {
-      id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: userProfile.name,
-      photoUrl: userProfile.photoUrl,
-      text: messageText,
-      timestamp: new Date(),
-    };
-
-    // Add to messages immediately
-    const updatedMessages = [...messages, localMessage];
-    setMessages(updatedMessages);
-
-    // Save to localStorage for persistence
     try {
-      localStorage.setItem('chat_messages', JSON.stringify(updatedMessages.slice(-50)));
-    } catch (error) {
-      console.error('LocalStorage save failed:', error);
-    }
+      // Clear typing status first
+      try {
+        await setTypingStatus(false);
+      } catch (typingError) {
+        console.warn('Could not clear typing status:', typingError);
+      }
+      
+      // Send message to Firebase
+      console.log('Attempting to send message to Firebase:', messageText);
+      console.log('Current user profile:', userProfile);
+      
+      const messageId = await sendMessage({ text: messageText });
+      
+      console.log('Message sent successfully with ID:', messageId);
+      
+      // Show success toast
+      toast({
+        title: "Pesan terkirim",
+        description: "Pesan berhasil dikirim ke chat",
+      });
 
-    // Show success message immediately
-    toast({
-      title: "Pesan terkirim",
-      description: "Pesan berhasil dikirim.",
-    });
-
-    // Try to send to backend services without blocking UI
-    try {
-      await setTypingStatus(false);
-      await sendMessage({ text: messageText });
-    } catch (error) {
-      console.warn('Backend send failed, message saved locally:', error);
+    } catch (error: any) {
+      console.error('Failed to send message:', error);
+      
+      // Show detailed error information
+      const errorMessage = error?.message || String(error) || 'Terjadi kesalahan tidak diketahui';
+      
+      toast({
+        title: "Gagal mengirim pesan",
+        description: `Error: ${errorMessage}`,
+        variant: "destructive"
+      });
+      
+      // Restore the message text so user can try again
+      setNewMessage(messageText);
     }
 
     // Clear typing timeout

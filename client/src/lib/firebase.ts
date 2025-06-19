@@ -36,6 +36,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-KS5CY801WP"
 };
 
+console.log('Firebase config initialized:', {
+  databaseURL: firebaseConfig.databaseURL,
+  apiKey: firebaseConfig.apiKey ? 'Present' : 'Missing',
+  authDomain: firebaseConfig.authDomain
+});
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -73,16 +79,16 @@ const messagesRef = ref(db, 'messages');
 const usersRef = ref(db, 'users');
 const typingRef = ref(db, 'typing');
 
-// Login anonymously with a display name - simplified without database operations
+// Login anonymously with a display name
 export const loginAnonymously = async (displayName: string, photoURL: string) => {
   try {
-    // Simple anonymous authentication without database operations
+    console.log('Starting Firebase anonymous authentication...');
     const result = await signInAnonymously(auth);
     currentUser = result.user;
     
     if (!currentUser) throw new Error('Failed to authenticate');
     
-    // Create user profile in memory only
+    // Create user profile
     const userProfile: UserInfo = {
       uid: currentUser.uid,
       displayName: displayName,
@@ -94,12 +100,17 @@ export const loginAnonymously = async (displayName: string, photoURL: string) =>
     // Cache user profile
     currentUserProfile = userProfile;
     
-    console.log('Logged in anonymously as', displayName);
+    console.log('Firebase authentication successful:', {
+      uid: currentUser.uid,
+      displayName: displayName
+    });
+    
     return userProfile;
     
   } catch (error) {
-    console.error('Login error:', error);
-    throw error;
+    console.error('Firebase authentication failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
+    throw new Error(`Authentication failed: ${errorMessage}`);
   }
 };
 
@@ -156,24 +167,48 @@ export const onAuthChanged = (callback: (user: UserInfo | null) => void) => {
   });
 };
 
-// Send a message - using public Firebase endpoint
+// Local message storage for offline functionality
+let localMessages: any[] = [];
+let messageListeners: ((messages: any[]) => void)[] = [];
+
+// Broadcast local messages to all listeners
+const broadcastLocalMessages = () => {
+  messageListeners.forEach(callback => callback([...localMessages]));
+};
+
+// Send a message - with local storage fallback
 export const sendMessage = async (message: { text: string }) => {
-  if (!currentUser || !currentUserProfile) {
-    throw new Error('User not authenticated');
-  }
-  
   try {
-    // Create message data with current timestamp
+    console.log('Attempting to send message:', message.text);
+    
+    // Ensure user is authenticated
+    if (!currentUser || !currentUserProfile) {
+      console.log('User not authenticated, attempting login...');
+      
+      // Get saved profile data from cookies
+      const savedName = document.cookie.split(';').find(row => row.trim().startsWith('chat_name='))?.split('=')[1];
+      const savedPhoto = document.cookie.split(';').find(row => row.trim().startsWith('chat_photo='))?.split('=')[1];
+      
+      if (savedName && savedPhoto) {
+        await loginAnonymously(decodeURIComponent(savedName), decodeURIComponent(savedPhoto));
+      } else {
+        throw new Error('No user profile available');
+      }
+    }
+    
+    // Create message data
     const messageData = {
-      uid: currentUser.uid,
-      name: currentUserProfile.displayName,
-      photoUrl: currentUserProfile.photoURL,
-      text: message.text,
+      uid: currentUser?.uid || 'anonymous',
+      name: currentUserProfile?.displayName || 'Anonymous',
+      photoUrl: currentUserProfile?.photoURL || '/default-avatar.png',
+      text: message.text.trim(),
       timestamp: Date.now(),
       isDeleted: false
     };
     
-    // Use REST API instead of SDK to bypass some permission issues
+    console.log('Sending message data:', messageData);
+    
+    // Try Firebase first
     try {
       const response = await fetch(`${firebaseConfig.databaseURL}/messages.json`, {
         method: 'POST',
@@ -185,17 +220,41 @@ export const sendMessage = async (message: { text: string }) => {
       
       if (response.ok) {
         const result = await response.json();
-        return result.name; // Firebase returns the generated key in 'name' field
+        console.log('Message sent successfully to Firebase with ID:', result.name);
+        return result.name;
       } else {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(`Firebase write failed: ${response.status}`);
       }
-    } catch (dbError) {
-      console.warn('Database write failed, message saved locally:', dbError);
-      return `local_${Date.now()}`;
+    } catch (firebaseError) {
+      console.warn('Firebase write failed, using local storage:', firebaseError);
+      
+      // Store message locally
+      const localMessageId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const localMessage = {
+        id: localMessageId,
+        ...messageData
+      };
+      
+      localMessages.push(localMessage);
+      
+      // Save to localStorage for persistence
+      try {
+        localStorage.setItem('chat_local_messages', JSON.stringify(localMessages));
+      } catch (storageError) {
+        console.warn('localStorage save failed:', storageError);
+      }
+      
+      // Broadcast to all listeners
+      broadcastLocalMessages();
+      
+      console.log('Message stored locally with ID:', localMessageId);
+      return localMessageId;
     }
-  } catch (error) {
-    console.error('Error sending message:', error);
-    throw error;
+    
+  } catch (error: any) {
+    console.error('Failed to send message:', error);
+    const errorMessage = error?.message || String(error) || 'Unknown error occurred';
+    throw new Error(`Message send failed: ${errorMessage}`);
   }
 };
 
@@ -257,57 +316,174 @@ export const sendImageMessage = async (imageUrl: string, caption: string = '') =
   }
 };
 
-// Subscribe to messages - using REST API for better compatibility
+// Subscribe to messages - with local storage integration
 export const subscribeToMessages = (callback: (messages: FirebaseMessage[]) => void, limit = 50) => {
-  const fetchMessages = async () => {
+  // Load local messages from localStorage on startup
+  try {
+    const savedLocalMessages = localStorage.getItem('chat_local_messages');
+    if (savedLocalMessages) {
+      localMessages = JSON.parse(savedLocalMessages);
+      console.log(`Loaded ${localMessages.length} local messages from storage`);
+    }
+  } catch (error) {
+    console.warn('Failed to load local messages:', error);
+    localMessages = [];
+  }
+
+  // Add this callback to local message listeners
+  messageListeners.push(callback);
+
+  // Function to combine Firebase and local messages
+  const combineAndSortMessages = (firebaseMessages: FirebaseMessage[], localMsgs: any[]) => {
+    const allMessages = [...firebaseMessages];
+    
+    // Add local messages that aren't duplicates
+    localMsgs.forEach(localMsg => {
+      if (!allMessages.find(msg => msg.id === localMsg.id)) {
+        allMessages.push({
+          id: localMsg.id,
+          uid: localMsg.uid || 'anonymous',
+          name: localMsg.name || 'Anonymous',
+          photoUrl: localMsg.photoUrl || '/default-avatar.png',
+          text: localMsg.text || '',
+          timestamp: localMsg.timestamp || Date.now(),
+          isDeleted: localMsg.isDeleted || false,
+          isImage: localMsg.isImage || false,
+          imageUrl: localMsg.imageUrl || ''
+        });
+      }
+    });
+    
+    // Sort by timestamp
+    allMessages.sort((a, b) => a.timestamp - b.timestamp);
+    return allMessages;
+  };
+
+  // Fallback function using REST API
+  const fetchMessagesViaREST = async () => {
     try {
-      // Use REST API to fetch messages
       const response = await fetch(`${firebaseConfig.databaseURL}/messages.json?orderBy="timestamp"&limitToLast=${limit}`);
+      
+      let firebaseMessages: FirebaseMessage[] = [];
       
       if (response.ok) {
         const data = await response.json();
         
-        if (!data) {
-          callback([]);
-          return;
-        }
-        
-        const messages: FirebaseMessage[] = [];
-        
-        // Convert to array and add IDs
-        Object.keys(data).forEach(key => {
-          const message = data[key];
-          messages.push({
-            id: key,
-            ...message,
-            timestamp: message.timestamp || Date.now()
+        if (data) {
+          Object.keys(data).forEach(key => {
+            const message = data[key];
+            if (message && !message.isDeleted) {
+              firebaseMessages.push({
+                id: key,
+                uid: message.uid || 'anonymous',
+                name: message.name || 'Anonymous',
+                photoUrl: message.photoUrl || '/default-avatar.png',
+                text: message.text || '',
+                timestamp: message.timestamp || Date.now(),
+                isDeleted: message.isDeleted || false,
+                isImage: message.isImage || false,
+                imageUrl: message.imageUrl || ''
+              });
+            }
           });
-        });
-        
-        // Sort by timestamp
-        messages.sort((a, b) => a.timestamp - b.timestamp);
-        
-        callback(messages);
+        }
       } else {
-        console.warn('Failed to fetch messages via REST API');
-        callback([]);
+        console.warn('Failed to fetch messages via REST API:', response.status);
       }
+      
+      const combinedMessages = combineAndSortMessages(firebaseMessages, localMessages);
+      console.log(`Loaded ${firebaseMessages.length} Firebase + ${localMessages.length} local = ${combinedMessages.length} total messages`);
+      callback(combinedMessages);
+      
     } catch (error) {
-      console.warn('REST API fetch failed:', error);
-      callback([]);
+      console.warn('REST API fetch failed, showing local messages only:', error);
+      const localOnly = combineAndSortMessages([], localMessages);
+      callback(localOnly);
     }
   };
-  
-  // Initial fetch
-  fetchMessages();
-  
-  // Set up polling for real-time updates (every 3 seconds)
-  const interval = setInterval(fetchMessages, 3000);
-  
-  // Return cleanup function
-  return () => {
-    clearInterval(interval);
-  };
+
+  // Try Firebase real-time subscription first
+  try {
+    const messagesQuery = query(
+      messagesRef,
+      orderByChild('timestamp'),
+      limitToLast(limit)
+    );
+    
+    const unsubscribe = onValue(messagesQuery, (snapshot) => {
+      try {
+        const data = snapshot.val();
+        const firebaseMessages: FirebaseMessage[] = [];
+        
+        if (data) {
+          Object.keys(data).forEach(key => {
+            const message = data[key];
+            if (message && !message.isDeleted) {
+              firebaseMessages.push({
+                id: key,
+                uid: message.uid || 'anonymous',
+                name: message.name || 'Anonymous',
+                photoUrl: message.photoUrl || '/default-avatar.png',
+                text: message.text || '',
+                timestamp: message.timestamp || Date.now(),
+                isDeleted: message.isDeleted || false,
+                isImage: message.isImage || false,
+                imageUrl: message.imageUrl || ''
+              });
+            }
+          });
+        }
+        
+        const combinedMessages = combineAndSortMessages(firebaseMessages, localMessages);
+        console.log(`Real-time: ${firebaseMessages.length} Firebase + ${localMessages.length} local = ${combinedMessages.length} total messages`);
+        callback(combinedMessages);
+        
+      } catch (error) {
+        console.error('Error processing real-time messages:', error);
+        fetchMessagesViaREST();
+      }
+    }, (error) => {
+      console.error('Firebase subscription error:', error);
+      console.log('Falling back to REST API polling...');
+      fetchMessagesViaREST();
+      
+      // Set up polling every 5 seconds as fallback
+      const pollInterval = setInterval(fetchMessagesViaREST, 5000);
+      
+      return () => {
+        clearInterval(pollInterval);
+        // Remove from listeners
+        const index = messageListeners.indexOf(callback);
+        if (index > -1) {
+          messageListeners.splice(index, 1);
+        }
+      };
+    });
+    
+    // Return cleanup function
+    return () => {
+      if (unsubscribe) unsubscribe();
+      // Remove from listeners
+      const index = messageListeners.indexOf(callback);
+      if (index > -1) {
+        messageListeners.splice(index, 1);
+      }
+    };
+    
+  } catch (error) {
+    console.error('Error setting up Firebase subscription:', error);
+    // Fall back to REST API polling
+    fetchMessagesViaREST();
+    const pollInterval = setInterval(fetchMessagesViaREST, 5000);
+    
+    return () => {
+      clearInterval(pollInterval);
+      const index = messageListeners.indexOf(callback);
+      if (index > -1) {
+        messageListeners.splice(index, 1);
+      }
+    };
+  }
 };
 
 // Subscribe to online users

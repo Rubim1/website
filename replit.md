@@ -109,6 +109,9 @@ The application supports multiple deployment targets:
 - June 19, 2025. Transformed UI to liquid glass design with glassmorphism effects
 - June 19, 2025. Optimized navigation - removed animated hover effects and moving box for instant response
 - June 19, 2025. Implemented animated menu selection highlighter with liquid glass design and spring animations
+- June 19, 2025. Added 3 new ceremony photos (17.png, 18.png, 19.png) to gallery section
+- June 19, 2025. Fixed Firebase real-time chat functionality with local storage fallback system
+- June 19, 2025. Implemented robust chat authentication and message persistence for offline functionality
 
 ## User Preferences
 

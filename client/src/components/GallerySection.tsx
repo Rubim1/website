@@ -105,6 +105,27 @@ const galleryItems: GalleryItem[] = [
     description: 'Keceriaan yang terpancar dari setiap wajah',
     imageUrl: 'https://rubim1.github.io/video/9.jpg',
     type: 'image'
+  },
+  {
+    id: 13,
+    title: 'Selesai Menjadi Petugas Upacara',
+    description: 'Bangga telah melaksanakan tugas sebagai petugas upacara dengan baik',
+    imageUrl: 'https://rubim1.github.io/video/17.png',
+    type: 'image'
+  },
+  {
+    id: 14,
+    title: 'Momen Setelah Upacara',
+    description: 'Kebanggaan setelah menyelesaikan tugas upacara bendera',
+    imageUrl: 'https://rubim1.github.io/video/18.png',
+    type: 'image'
+  },
+  {
+    id: 15,
+    title: 'Tim Petugas Upacara',
+    description: 'Bersama tim petugas upacara yang solid dan kompak',
+    imageUrl: 'https://rubim1.github.io/video/19.png',
+    type: 'image'
   }
 ];
 
