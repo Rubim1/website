@@ -227,114 +227,16 @@ const DeveloperSection: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Developer Profiles */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8 max-w-6xl mx-auto mb-16">
-          {/* First Developer - @qinvibes */}
+        {/* Main Developer Profile - Itsbymz */}
+        <div className="flex justify-center mb-20">
           <motion.div 
-            className="lg:col-span-2 relative"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            {/* @qinvibes profile card */}
-            <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
-              {/* Glowing edges */}
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
-              </div>
-
-              <div className="p-6 md:p-8 flex flex-col items-center">
-                {/* Profile Image with Aura */}
-                <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
-                  {/* Image auras */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
-
-                  {/* Actual image */}
-                  <motion.div 
-                    className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{ repeat: Infinity, duration: 3 }}
-                  >
-                    <img 
-                      src="https://rubim1.github.io/video/pfp2.jpg" 
-                      alt="@qinvibes Profile" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  </motion.div>
-                </div>
-
-                {/* Name and Title */}
-                <motion.h3 
-                  className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <span className="relative">
-                    @qinvibes
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
-                  </span>
-                </motion.h3>
-
-                <motion.p 
-                  className="text-xl text-accent mb-6 text-center"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                  Digital Management Class Journal Holder
-                </motion.p>
-
-                {/* Description */}
-                <div className="h-24 mb-6">
-                  <motion.p 
-                    className="text-gray-300 text-center"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    just vibes & sunsets
-                  </motion.p>
-                </div>
-
-                {/* Placeholder for spacing */}
-                <div className="mb-8"></div>
-
-                {/* Journal Button */}
-                <motion.a 
-                  href="#"
-                  className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  <i className="fas fa-book mr-2"></i> Journal Button
-                </motion.a>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Middle Developer - Itsbymz(rubim) */}
-          <motion.div 
-            className="lg:col-span-2 relative"
+            className="max-w-md relative"
             initial={{ opacity: 0, y: -30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.8 }}
           >
-            {/* Profile card */}
+            {/* Itsbymz(rubim) Profile card */}
             <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
               {/* Glowing edges */}
               <div className="absolute inset-0 overflow-hidden">
@@ -387,7 +289,7 @@ const DeveloperSection: React.FC = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  Website Owner
+                  Website Owner & Developer
                 </motion.p>
 
                 {/* Description with typing effect */}
@@ -448,75 +350,254 @@ const DeveloperSection: React.FC = () => {
               </div>
             </div>
           </motion.div>
+        </div>
 
-          {/* Third Developer - nanashii */}
-          <motion.div 
-            className="lg:col-span-2 relative"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            {/* Profile card */}
-            <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
-              {/* Glowing edges */}
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
-                <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+        {/* Interactive Space Section */}
+        <motion.div 
+          className="mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          {/* 3D Canvas Animation Section */}
+          <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center justify-center">
+              <i className="fas fa-cube text-accent mr-3"></i>
+              <span>Interactive Space</span>
+            </h3>
+
+            <div className="aspect-video w-full bg-black/80 rounded-lg border border-accent/10 relative overflow-hidden frame-impact" onClick={handleImpactClick}>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div 
+                  className="text-9xl text-accent font-orbitron seven-text"
+                  animate={{ 
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 0.95, 1]
+                  }}
+                  transition={{ 
+                    duration: 8, 
+                    repeat: Infinity,
+                    ease: "linear" 
+                  }}
+                >
+                  7
+                </motion.div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col items-center">
-                {/* Profile Image with Aura */}
-                <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
-                  {/* Image auras */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute inset-0">
+                {Array.from({ length: 20 }).map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className="absolute rounded-full bg-accent/20"
+                    style={{
+                      width: Math.random() * 40 + 10,
+                      height: Math.random() * 40 + 10,
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                    }}
+                    animate={{
+                      x: [0, Math.random() * 100 - 50],
+                      y: [0, Math.random() * 100 - 50],
+                      opacity: [0, 0.7, 0]
+                    }}
+                    transition={{
+                      duration: Math.random() * 8 + 5,
+                      repeat: Infinity,
+                      delay: Math.random() * 5
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
 
-                  {/* Actual image */}
-                  <motion.div 
-                    className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{ repeat: Infinity, duration: 3 }}
-                  >
-                    <img 
-                      src="https://rubim1.github.io/video/pfp3.jpg" 
-                      alt="nanashii Profile" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  </motion.div>
+            <div className="mt-6 flex justify-center">
+              <div className="inline-block text-center bg-black/40 px-6 py-3 rounded-lg border border-accent/10">
+                <p className="text-white">Hover and click around to interact with particles</p>
+                <p className="text-gray-400 text-sm mt-1">Experience the magic of interactive 3D space</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Other Teams Section */}
+        <motion.div 
+          className="mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="text-center mb-12">
+            <h3 className="text-4xl font-orbitron font-bold text-white mb-4">
+              Other Teams
+            </h3>
+            <div className="w-24 h-1 bg-accent mx-auto mb-6"></div>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Meet the talented team members who contribute to our class's success.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* @qinvibes */}
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              {/* @qinvibes profile card */}
+              <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
+                {/* Glowing edges */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
                 </div>
 
-                {/* Name and Title */}
-                <motion.h3 
-                  className="text-3xl font-orbitron font-bold text-white mb-2 text-center"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <span className="relative">
-                    nanashii
-                    <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
-                  </span>
-                </motion.h3>
+                <div className="p-6 md:p-8 flex flex-col items-center">
+                  {/* Profile Image with Aura */}
+                  <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
+                    {/* Image auras */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
 
-                <motion.p 
-                  className="text-xl text-accent mb-6 text-center"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                  Digital Management Finance Holder
-                </motion.p>
+                    {/* Actual image */}
+                    <motion.div 
+                      className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ repeat: Infinity, duration: 3 }}
+                    >
+                      <img 
+                        src="https://rubim1.github.io/video/pfp2.jpg" 
+                        alt="@qinvibes Profile" 
+                        className="w-full h-full object-cover" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </motion.div>
+                  </div>
 
-                {/* Description */}
-                <div className="h-24 mb-6">
+                  {/* Name and Title */}
+                  <motion.h4 
+                    className="text-2xl font-orbitron font-bold text-white mb-2 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
+                    <span className="relative">
+                      @qinvibes
+                      <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
+                    </span>
+                  </motion.h4>
+
                   <motion.p 
-                    className="text-gray-300 text-center"
+                    className="text-lg text-accent mb-4 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                  >
+                    Digital Management Class Journal Holder
+                  </motion.p>
+
+                  {/* Description */}
+                  <motion.p 
+                    className="text-gray-300 text-center mb-6"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
+                    just vibes & sunsets
+                  </motion.p>
+
+                  {/* Journal Button */}
+                  <motion.a 
+                    href="#"
+                    className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    <i className="fas fa-book mr-2"></i> Journal Button
+                  </motion.a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* nanashii */}
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              {/* nanashii profile card */}
+              <div className="relative bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 h-full">
+                {/* Glowing edges */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+                  <div className="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-transparent via-accent/50 to-transparent"></div>
+                </div>
+
+                <div className="p-6 md:p-8 flex flex-col items-center">
+                  {/* Profile Image with Aura */}
+                  <div className="relative frame-impact mb-6" onClick={handleImpactClick}>
+                    {/* Image auras */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] rounded-full bg-accent/10 animate-pulse-slow"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-white/5 animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+
+                    {/* Actual image */}
+                    <motion.div 
+                      className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-accent/30 animate-float"
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ repeat: Infinity, duration: 3 }}
+                    >
+                      <img 
+                        src="https://rubim1.github.io/video/pfp3.jpg" 
+                        alt="nanashii Profile" 
+                        className="w-full h-full object-cover" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </motion.div>
+                  </div>
+
+                  {/* Name and Title */}
+                  <motion.h4 
+                    className="text-2xl font-orbitron font-bold text-white mb-2 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
+                    <span className="relative">
+                      nanashii
+                      <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-accent/50"></span>
+                    </span>
+                  </motion.h4>
+
+                  <motion.p 
+                    className="text-lg text-accent mb-4 text-center"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                  >
+                    Digital Management Finance Holder
+                  </motion.p>
+
+                  {/* Description */}
+                  <motion.p 
+                    className="text-gray-300 text-center mb-6"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -524,96 +605,25 @@ const DeveloperSection: React.FC = () => {
                   >
                     mulfand
                   </motion.p>
-                </div>
 
-                {/* Placeholder for spacing */}
-                <div className="mb-8"></div>
-
-                {/* Finance Button */}
-                <motion.a 
-                  href="#"
-                  className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                  <i className="fas fa-money-bill-wave mr-2"></i> Finance Button
-                </motion.a>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Column - Skills and Projects */}
-          <motion.div 
-            className="lg:col-span-3"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            {/* 3D Canvas Animation Section */}
-            <div className="bg-black/60 backdrop-blur-lg rounded-2xl border border-accent/20 overflow-hidden shadow-lg shadow-accent/5 p-6 md:p-8">
-              <h3 className="text-2xl font-orbitron font-bold text-white mb-6 flex items-center">
-                <i className="fas fa-cube text-accent mr-3"></i>
-                <span>Interactive Space</span>
-              </h3>
-
-              <div className="aspect-video w-full bg-black/80 rounded-lg border border-accent/10 relative overflow-hidden frame-impact" onClick={handleImpactClick}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div 
-                    className="text-9xl text-accent font-orbitron seven-text"
-                    animate={{ 
-                      rotate: [0, 5, -5, 0],
-                      scale: [1, 1.05, 0.95, 1]
-                    }}
-                    transition={{ 
-                      duration: 8, 
-                      repeat: Infinity,
-                      ease: "linear" 
-                    }}
+                  {/* Finance Button */}
+                  <motion.a 
+                    href="#"
+                    className="w-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-lg py-3 px-6 text-center transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
                   >
-                    7
-                  </motion.div>
-                </div>
-
-                <div className="absolute inset-0">
-                  {Array.from({ length: 20 }).map((_, index) => (
-                    <motion.div
-                      key={index}
-                      className="absolute rounded-full bg-accent/20"
-                      style={{
-                        width: Math.random() * 40 + 10,
-                        height: Math.random() * 40 + 10,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                      }}
-                      animate={{
-                        x: [0, Math.random() * 100 - 50],
-                        y: [0, Math.random() * 100 - 50],
-                        opacity: [0, 0.7, 0]
-                      }}
-                      transition={{
-                        duration: Math.random() * 8 + 5,
-                        repeat: Infinity,
-                        delay: Math.random() * 5
-                      }}
-                    />
-                  ))}
+                    <i className="fas fa-money-bill-wave mr-2"></i> Finance Button
+                  </motion.a>
                 </div>
               </div>
-
-              <div className="mt-6 flex justify-center">
-                <div className="inline-block text-center bg-black/40 px-6 py-3 rounded-lg border border-accent/10">
-                  <p className="text-white">Hover and click around to interact with particles</p>
-                  <p className="text-gray-400 text-sm mt-1">Experience the magic of interactive 3D space</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

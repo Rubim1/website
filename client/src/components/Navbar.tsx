@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createRipple, magneticEffect } from '@/lib/microInteractions';
 // import { useTheme3D } from '@/contexts/Theme3DContext'; //Removed import
@@ -10,8 +10,41 @@ const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('#');
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const [highlighter, setHighlighter] = useState({ width: 0, left: 0, opacity: 0 });
   // const { enable3D, toggleEnable3D } = useTheme3D(); //Removed variables
   const isMobile = useIsMobile();
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // Function to update highlighter position with correct calculation
+  const updateHighlighter = (targetUrl: string) => {
+    if (navRef.current) {
+      requestAnimationFrame(() => {
+        // Find the navigation container and target link
+        const navContainer = navRef.current!.querySelector('.flex.items-center.space-x-2.relative.z-10') as HTMLElement;
+        
+        if (navContainer) {
+          // Get only the navigation links within the container (excluding other elements)
+          const navLinks = navContainer.querySelectorAll('a[data-nav-link]') as NodeListOf<HTMLElement>;
+          const targetLink = Array.from(navLinks).find(link => 
+            link.getAttribute('data-nav-link') === targetUrl
+          );
+          
+          if (targetLink) {
+            // Calculate position relative to the nav container, not the document
+            const containerRect = navContainer.getBoundingClientRect();
+            const linkRect = targetLink.getBoundingClientRect();
+            
+            setHighlighter({
+              width: linkRect.width,
+              left: linkRect.left - containerRect.left,
+              opacity: 1
+            });
+          }
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,7 +63,13 @@ const Navbar: React.FC = () => {
         const sectionId = `#${section.getAttribute('id')}`;
 
         if (offset >= sectionTop && offset < sectionTop + sectionHeight) {
-          setActiveLink(sectionId);
+          if (activeLink !== sectionId) {
+            setActiveLink(sectionId);
+            // Update highlighter immediately when section changes
+            if (!isMobile) {
+              setTimeout(() => updateHighlighter(sectionId), 50);
+            }
+          }
         }
       });
     };
@@ -39,7 +78,18 @@ const Navbar: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isMobile]);
+
+  // Initialize highlighter position on mount and when activeLink changes
+  useEffect(() => {
+    if (!isMobile && navRef.current && activeLink) {
+      const timer = setTimeout(() => {
+        updateHighlighter(activeLink);
+      }, 150);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeLink, isMobile]);
 
   const navLinks = [
     { title: 'Home', url: '#hero' },
@@ -55,79 +105,112 @@ const Navbar: React.FC = () => {
     <>
       <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 w-auto">
         <motion.div 
-          className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 shadow-2xl max-w-5xl"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          className="relative rounded-full px-4 py-2 shadow-2xl max-w-5xl"
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(25px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
+          initial={{ opacity: 0, y: -30, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ 
+            duration: 0.8,
+            type: "spring",
+            stiffness: 100,
+            damping: 15
+          }}
         >
           <div className="flex items-center space-x-4">
             {/* Logo */}
-            <motion.a 
+            <a 
               href="#hero" 
               className="flex items-center group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <span className="text-xl font-bold font-orbitron relative">
                 <span className="bg-gradient-to-r from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent mr-1">7</span>
                 <span className="text-white">AMAZING</span>
               </span>
-            </motion.a>
+            </a>
 
             {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navLinks.map((link, index) => (
-                <motion.a 
-                  key={index} 
-                  href={link.url}
-                  className={`px-4 py-2 rounded-full transition-all duration-300 text-sm relative ${
-                    activeLink === link.url 
-                      ? 'text-black bg-white font-medium' 
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => createRipple(e)}
-                >
-                  {link.title}
-                </motion.a>
-              ))}
+            <div className="hidden lg:flex items-center relative" ref={navRef}>
+              {/* Animated Selection Highlighter */}
+              <motion.div
+                className="absolute rounded-xl z-0 h-10"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)'
+                }}
+                animate={{
+                  width: highlighter.width,
+                  x: highlighter.left,
+                  opacity: highlighter.opacity
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+                initial={{ opacity: 0 }}
+              />
+              
+              {/* Navigation links */}
+              <div className="flex items-center space-x-2 relative z-10">
+                {navLinks.map((link) => (
+                  <a 
+                    key={link.url} 
+                    href={link.url}
+                    data-nav-link={link.url}
+                    className={`px-4 py-2 rounded-xl transition-colors duration-200 text-sm relative cursor-pointer ${
+                      activeLink === link.url 
+                        ? 'text-white font-medium' 
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    <span className="relative z-10">{link.title}</span>
+                  </a>
+                ))}
+              </div>
             </div>
             
             {/* AI Chat Link - Desktop */}
             <div className="hidden lg:block">
               <Link href="/ai-chat">
-                <motion.div 
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-full text-white font-medium text-sm cursor-pointer"
-                  whileHover={{ 
-                    scale: 1.05,
-                    boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)"
+                <div 
+                  className="px-4 py-2 rounded-full text-white font-medium text-sm cursor-pointer relative overflow-hidden"
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.15)',
+                    backdropFilter: 'blur(15px)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
                   }}
-                  whileTap={{ scale: 0.95 }}
                 >
-                  <i className="fas fa-robot mr-2"></i>
-                  AI Chat
-                </motion.div>
+                  <span className="relative z-10">
+                    <i className="fas fa-robot mr-2"></i>
+                    AI Chat
+                  </span>
+                </div>
               </Link>
             </div>
 
             {/* Mobile Menu Button */}
-            <motion.button 
-              className="lg:hidden bg-white/10 backdrop-blur-sm rounded-full h-10 w-10 flex items-center justify-center focus:outline-none"
-              whileTap={{ scale: 0.9 }}
+            <button 
+              className="lg:hidden rounded-full h-10 w-10 flex items-center justify-center focus:outline-none"
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              <motion.div
-                animate={mobileMenuOpen ? "open" : "closed"}
-                variants={{
-                  open: { rotate: 180 },
-                  closed: { rotate: 0 }
-                }}
-                transition={{ duration: 0.3 }}
-              >
+              <div>
                 <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-white`}></i>
-              </motion.div>
-            </motion.button>
+              </div>
+            </button>
           </div>
         </motion.div>
       </nav>
@@ -143,45 +226,33 @@ const Navbar: React.FC = () => {
           >
             <div className="container mx-auto px-4 flex flex-col space-y-6 items-center">
               <div className="w-full max-w-md mx-auto">
-                {navLinks.map((link, index) => (
-                  <motion.a 
-                    key={index} 
+                {navLinks.map((link) => (
+                  <a 
+                    key={link.url} 
                     href={link.url}
-                    className={`bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl my-3 py-4 px-6 flex items-center justify-between w-full ${
+                    className={`bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl my-3 py-4 px-6 flex items-center justify-between w-full transition-colors duration-200 ${
                       activeLink === link.url ? 'bg-white text-black' : 'text-white'
                     }`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     <span className="text-lg font-medium">{link.title}</span>
                     <i className="fas fa-chevron-right"></i>
-                  </motion.a>
+                  </a>
                 ))}
               </div>
 
               {/* AI Chat Link for Mobile */}
-              <motion.div
-                className="w-full max-w-md mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: navLinks.length * 0.1 + 0.1 }}
-              >
+              <div className="w-full max-w-md mx-auto">
                 <Link href="/ai-chat">
-                  <motion.div 
+                  <div 
                     className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-2xl py-4 px-6 flex items-center justify-between w-full text-white"
                     onClick={() => setMobileMenuOpen(false)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     <span className="text-lg font-medium">AI Chat</span>
                     <i className="fas fa-robot"></i>
-                  </motion.div>
+                  </div>
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}

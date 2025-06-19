@@ -6,10 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 
 // Define custom elements for TypeScript
 declare global {
-  interface Window {
-    splineViewerReady?: boolean;
-  }
-  
   namespace JSX {
     interface IntrinsicElements {
       'spline-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
@@ -21,6 +17,8 @@ declare global {
     }
   }
 }
+
+
 
 interface NavItem {
   title: string;
@@ -105,6 +103,32 @@ const HeroSection: React.FC = () => {
       window.removeEventListener('resize', updateWindowSize);
     };
   }, []);
+
+  // Load spline-viewer script
+  useEffect(() => {
+    if (!enable3D) return;
+
+    const existingScript = document.querySelector('script[src*="spline-viewer"]');
+    if (existingScript) return;
+
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://unpkg.com/@splinetool/viewer@1.10.12/build/spline-viewer.js';
+    script.onload = () => {
+      console.log('Spline viewer script loaded successfully');
+    };
+    script.onerror = () => {
+      console.error('Failed to load spline viewer script');
+    };
+    
+    document.head.appendChild(script);
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, [enable3D]);
   
   // For direct toggle without dialog, uncomment this line
   const handleToggle3D = () => {
@@ -119,48 +143,7 @@ const HeroSection: React.FC = () => {
     }
   };
 
-  // Effect to handle Spline viewer initialization
-  useEffect(() => {
-    if (!enable3D) return;
-    
-    let splineTimeout: ReturnType<typeof setTimeout>;
-    
-    const handleSplineReady = () => {
-      console.log("Spline viewer is ready");
-      
-      const splineEl = document.querySelector('spline-viewer');
-      if (splineEl) {
-        // Ensure spline viewer is properly styled
-        const splineViewer = splineEl as HTMLElement;
-        splineViewer.style.width = '100%';
-        splineViewer.style.height = '100%';
-        splineViewer.style.position = 'absolute';
-        splineViewer.style.top = '0';
-        splineViewer.style.left = '0';
-      }
-    };
-    
-    // Listen for spline viewer ready event
-    window.addEventListener('spline-viewer-ready', handleSplineReady);
-    
-    // If Spline is already ready, handle it immediately
-    if (window.splineViewerReady) {
-      handleSplineReady();
-    } else {
-      // Set a timeout to check if Spline loads
-      splineTimeout = setTimeout(() => {
-        const splineEl = document.querySelector('spline-viewer');
-        if (splineEl) {
-          handleSplineReady();
-        }
-      }, 2000);
-    }
 
-    return () => {
-      window.removeEventListener('spline-viewer-ready', handleSplineReady);
-      clearTimeout(splineTimeout);
-    };
-  }, [enable3D]);
 
   // Show performance notification toast
   useEffect(() => {
@@ -198,7 +181,7 @@ const HeroSection: React.FC = () => {
   const tilt = calculateTilt(mousePosition.x, mousePosition.y);
 
   return (
-    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24">
+    <section id="hero" className="relative w-full overflow-hidden" style={{ minHeight: '100vh' }}>
       {/* Custom 3D Activation Confirmation Dialog */}
       {confirmDialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-[100]">
@@ -253,28 +236,48 @@ const HeroSection: React.FC = () => {
           filter: 'brightness(0.15) contrast(1.2)'
         }}
       />
-      
       {/* 3D Spline background */}
       {enable3D && (
         <div className="absolute inset-0 z-[1]" id="spline-3d-container">
-          <spline-viewer url="https://prod.spline.design/UJHhKmvjyDbZ4xzN/scene.splinecode"></spline-viewer>
+          <spline-viewer url="https://prod.spline.design/CMXfxOZ-vRtYleGr/scene.splinecode"></spline-viewer>
         </div>
       )}
-      
-      {/* Static background (shown when 3D is disabled) */}
+      {/* Static background with video (shown when 3D is disabled) */}
       {!enable3D && (
-        <div className="absolute inset-0 z-[1]" style={{ background: '#000000' }}>
-          <div className="w-full h-full bg-gradient-to-b from-[#001428] to-black">
-            <div className="absolute inset-0 opacity-20">
-              <div className="stars-container"></div>
-            </div>
-          </div>
+        <div className="absolute inset-0 z-[1]">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ 
+              filter: 'brightness(0.5) contrast(1.2) blur(2px)',
+              aspectRatio: '16/9'
+            }}
+            onLoadedData={(e) => {
+              const video = e.target as HTMLVideoElement;
+              video.muted = true;
+              video.currentTime = 0;
+              video.play().catch(() => {
+                console.log('Video autoplay failed, user interaction required');
+              });
+            }}
+            onEnded={(e) => {
+              const video = e.target as HTMLVideoElement;
+              video.currentTime = 0;
+              video.play();
+            }}
+          >
+            <source src="https://rubim1.github.io/video/backgorundv2.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/10"></div>
         </div>
       )}
-      
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/80 to-black z-0" />
-      
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 z-0" />
       {/* Animated aura */}
       <div 
         className="absolute w-[500px] h-[500px] rounded-full bg-accent/20 blur-[100px] z-0"
@@ -286,26 +289,8 @@ const HeroSection: React.FC = () => {
           opacity: 0.4
         }}
       />
-      
-      {/* Static dots instead of animated particles for better performance */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <div className="absolute top-0 left-0 w-full h-full">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="absolute w-1 h-1 bg-white rounded-full"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.5 + 0.3
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
       {/* Content */}
-      <div className="container mx-auto px-4 z-[10] relative text-center">
+      <div className="container mx-auto px-4 z-[10] relative text-center flex flex-col justify-center min-h-screen pt-[130px] pb-[130px] mt-[-16px] mb-[-16px]">
         <motion.div 
           className="animate-float"
           initial={{ opacity: 0, y: -20 }}
@@ -319,7 +304,7 @@ const HeroSection: React.FC = () => {
           <div className="relative mb-6">
             {/* Ultra-premium title with layered effects */}
             <motion.h1 
-              className="text-6xl md:text-8xl font-bold relative inline-block"
+              className="text-4xl md:text-6xl lg:text-7xl font-bold relative inline-block"
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -330,7 +315,7 @@ const HeroSection: React.FC = () => {
               {/* Normal styled 7 */}
               <div className="relative inline-block mr-4">
                 <motion.span 
-                  className="text-8xl md:text-9xl font-bold bg-gradient-to-br from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent"
+                  className="text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-br from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
@@ -343,7 +328,7 @@ const HeroSection: React.FC = () => {
                 </motion.span>
               </div>
               
-              {/* "MAZING" text with animated gradient */}
+              {/* "AMAZING" text with animated gradient */}
               <motion.span 
                 className="modern-gradient-text relative z-10"
                 initial={{ opacity: 0, filter: "blur(8px)" }}
@@ -356,7 +341,7 @@ const HeroSection: React.FC = () => {
                   delay: 1.2
                 }}
               >
-                MAZING
+                AMAZING
               </motion.span>
               
               {/* Animated highlight underline */}
@@ -407,7 +392,7 @@ const HeroSection: React.FC = () => {
           {/* Subtitle with animated text */}
           <div className="relative">
             <motion.p 
-              className="text-xl md:text-2xl text-gray-300 mb-8"
+              className="text-lg md:text-xl lg:text-2xl text-gray-300 mb-16 md:mb-20 lg:mb-24"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -430,34 +415,31 @@ const HeroSection: React.FC = () => {
               </span>
             </motion.p>
           </div>
-          
-          {/* Static dots for better performance */}
-          <div className="relative w-full max-w-xs mx-auto h-1 my-8">
-            <div className="absolute left-0 w-2 h-2 rounded-full bg-accent opacity-60" />
-            <div className="absolute left-1/4 w-2 h-2 rounded-full bg-accent opacity-80" />
-            <div className="absolute left-2/4 w-2 h-2 rounded-full bg-accent opacity-70" />
-            <div className="absolute left-3/4 w-2 h-2 rounded-full bg-accent opacity-90" />
-            <div className="absolute right-0 w-2 h-2 rounded-full bg-accent opacity-60" />
-          </div>
         </motion.div>
         
         {/* Premium Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-32 md:mt-40 lg:mt-48 max-w-6xl mx-auto px-4">
           {navItems.map((item, index) => (
             <motion.div
               key={index}
-              className="glass-card neon-border rounded-xl overflow-hidden transform transition-all duration-300"
+              className="relative rounded-2xl overflow-hidden transform transition-all duration-500 flex flex-col"
               style={{ 
                 animationDelay: `${item.delay}s`,
-                position: 'relative'
+                position: 'relative',
+                minHeight: '200px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 + item.delay }}
               whileHover={{ 
                 y: -8,
-                boxShadow: "0 0 25px rgba(59, 130, 246, 0.4)",
-                borderColor: "rgba(59, 130, 246, 0.6)"
+                scale: 1.02,
+                background: 'rgba(255, 255, 255, 0.08)',
+                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.2), 0 0 20px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
               }}
             >
               {/* Static background glow for better performance */}
@@ -466,45 +448,65 @@ const HeroSection: React.FC = () => {
               />
               
               {/* Top corner accent */}
-              <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
-                <div className="absolute rotate-45 bg-gradient-to-r from-blue-500/20 to-blue-300/20 w-24 h-8 -top-4 -right-8 backdrop-blur-sm"></div>
+              <div className="absolute top-0 right-0 w-8 h-8 overflow-hidden">
+                <div className="absolute rotate-45 bg-gradient-to-r from-blue-500/20 to-blue-300/20 w-12 h-4 -top-2 -right-4 backdrop-blur-sm"></div>
               </div>
               
-              <div className="relative z-10 p-6">
+              <div className="relative z-10 p-4 flex flex-col flex-1">
                 {/* Icon with static glow for better performance */}
                 <div 
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/10 via-blue-300/10 to-blue-900/10 flex items-center justify-center text-3xl text-blue-400 mb-4 border border-blue-500/30 hover:scale-110 transition-all duration-300"
-                  style={{ boxShadow: '0 0 8px rgba(59, 130, 246, 0.4)' }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/10 via-blue-300/10 to-blue-900/10 flex items-center justify-center text-xl text-blue-400 mb-3 border border-blue-500/30 hover:scale-110 transition-all duration-300 mx-auto"
+                  style={{ boxShadow: '0 0 6px rgba(59, 130, 246, 0.4)' }}
                 >
                   <i className={`fas ${item.icon}`}></i>
                 </div>
                 
-                <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
-                <p className="text-gray-300 mb-6">{item.desc}</p>
+                <h3 className="text-sm font-semibold mb-2 text-white text-center leading-tight">{item.title}</h3>
+                <p className="text-gray-300 mb-4 text-xs text-center leading-tight flex-1">{item.desc}</p>
                 
-                {/* Premium button with hover effect */}
-                <motion.a 
-                  href={item.url} 
-                  target={item.external ? "_blank" : undefined} 
-                  rel={item.external ? "noopener noreferrer" : undefined}
-                  className="relative overflow-hidden inline-flex items-center justify-center group"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {/* Button background with gradient */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-800 rounded-lg opacity-90 group-hover:opacity-100 transition-opacity"></span>
-                  
-                  {/* Button content */}
-                  <span className="relative px-6 py-2.5 text-white font-medium flex items-center space-x-1">
-                    <span>{item.external ? "Access" : "Explore"}</span>
-                    <motion.span
-                      animate={item.external ? { x: [0, 3, 0] } : { x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, repeatType: "mirror" }}
-                    >
-                      <i className={`fas ${item.external ? "fa-external-link-alt" : "fa-arrow-right"}`}></i>
-                    </motion.span>
-                  </span>
-                </motion.a>
+                {/* Premium button with hover effect - positioned at bottom */}
+                <div className="mt-auto">
+                  <motion.a 
+                    href={item.url} 
+                    target={item.external ? "_blank" : undefined} 
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="relative overflow-hidden inline-flex items-center justify-center group w-full rounded-xl"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                    }}
+                    whileHover={{ 
+                      scale: 1.02,
+                      background: 'rgba(59, 130, 246, 0.2)',
+                      boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {/* Liquid glass shimmer effect */}
+                    <motion.span 
+                      className="absolute inset-0 rounded-xl"
+                      style={{
+                        background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)',
+                        transform: 'translateX(-100%)'
+                      }}
+                      animate={{ transform: ['translateX(-100%)', 'translateX(100%)'] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    />
+                    
+                    {/* Button content */}
+                    <span className="relative px-4 py-2 text-white font-medium flex items-center justify-center space-x-1 text-sm z-10">
+                      <span>{item.external ? "Access" : "Go"}</span>
+                      <motion.span
+                        animate={item.external ? { x: [0, 2, 0] } : { x: [0, 3, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, repeatType: "mirror" }}
+                      >
+                        <i className={`fas ${item.external ? "fa-external-link-alt" : "fa-arrow-right"} text-sm`}></i>
+                      </motion.span>
+                    </span>
+                  </motion.a>
+                </div>
                 
                 {/* Static bottom accent line */}
                 <div 
@@ -516,7 +518,7 @@ const HeroSection: React.FC = () => {
         </div>
         
         <motion.div 
-          className="mt-20"
+          className="md:mt-16 lg:mt-20 mt-[30px] mb-[30px]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1 }}
@@ -706,8 +708,8 @@ const HeroSection: React.FC = () => {
             </div>
           </motion.button>
         </motion.div>
+        
       </div>
-      
       {/* Premium animated scroll indicator */}
       <motion.div 
         className="absolute bottom-10 left-0 right-0 mx-auto text-center"

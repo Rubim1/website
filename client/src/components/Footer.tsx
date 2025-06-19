@@ -67,15 +67,15 @@ const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li className="flex items-start">
                 <i className="fas fa-map-marker-alt text-primary mt-1 mr-3"></i>
-                <span className="text-gray-400">SMP Amazing School, Jakarta, Indonesia</span>
+                <span className="text-gray-400">Jl. Jend. Basuki Rahmad No. 56, Cluring, Banyuwangi, Jawa Timur</span>
               </li>
               <li className="flex items-start">
                 <i className="fas fa-envelope text-primary mt-1 mr-3"></i>
-                <span className="text-gray-400">7amazing@school.edu</span>
+                <span className="text-gray-400">ekklesiakerubim@gmail.com</span>
               </li>
               <li className="flex items-start">
                 <i className="fas fa-phone text-primary mt-1 mr-3"></i>
-                <span className="text-gray-400">+62 123 4567 890</span>
+                <span className="text-gray-400">+62 895 2274 9532</span>
               </li>
             </ul>
           </motion.div>

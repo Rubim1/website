@@ -1,11 +1,49 @@
-import React, { useEffect, ReactNode } from 'react';
+import React, { useEffect, ReactNode, useRef } from 'react';
 
 interface SmoothScrollProps {
   children: ReactNode;
 }
 
 const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
-  // Implement smooth scrolling for anchor links
+  const rafRef = useRef<number | null>(null);
+  const scrollTargetRef = useRef<number | null>(null);
+  const isScrollingRef = useRef(false);
+
+  // Enhanced smooth scrolling with custom easing
+  const easeInOutCubic = (t: number): number => {
+    return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+  };
+
+  const smoothScrollTo = (targetY: number, duration: number = 1000) => {
+    const startY = window.pageYOffset;
+    const difference = targetY - startY;
+    const startTime = performance.now();
+    
+    isScrollingRef.current = true;
+
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
+      
+      window.scrollTo(0, startY + difference * easedProgress);
+      
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        isScrollingRef.current = false;
+        rafRef.current = null;
+      }
+    };
+    
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    
+    rafRef.current = requestAnimationFrame(step);
+  };
+
+  // Enhanced anchor link handling
   useEffect(() => {
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -18,10 +56,11 @@ const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
         const targetElement = document.getElementById(targetId || '');
         
         if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80, // Adjust for navigation bar height
-            behavior: 'smooth'
-          });
+          const headerOffset = 100; // Adjust for navigation bar
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          
+          window.scrollTo(0, offsetPosition);
         }
       }
     };
@@ -30,29 +69,79 @@ const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     
     return () => {
       document.removeEventListener('click', handleAnchorClick);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, []);
 
-  // Add animation on scroll for elements with data-aos attribute
+  // Simple scroll-triggered animations only for specific elements
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      
-      document.querySelectorAll('[data-aos]').forEach((element) => {
-        const rect = element.getBoundingClientRect();
-        const isVisible = rect.top < windowHeight * 0.8 && rect.bottom > 0;
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -20% 0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const element = entry.target as HTMLElement;
         
-        if (isVisible) {
-          element.classList.add('aos-animate');
+        if (entry.isIntersecting) {
+          // Only animate specific cards/components, not entire sections
+          element.classList.add('scroll-animate');
         }
       });
+    }, observerOptions);
+
+    // Only observe cards and small components, not sections
+    const observeElements = () => {
+      const elementsToObserve = document.querySelectorAll(
+        '.glass-card:not(.scroll-animate), .neon-border:not(.scroll-animate)'
+      );
+      
+      elementsToObserve.forEach((element) => {
+        observer.observe(element);
+      });
+    };
+
+    // Delay observation to ensure DOM is ready
+    const timeoutId = setTimeout(observeElements, 500);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Parallax effect for background elements
+  useEffect(() => {
+    let ticking = false;
+
+    const updateParallax = () => {
+      if (isScrollingRef.current) return;
+      
+      const scrolled = window.pageYOffset;
+      const parallaxElements = document.querySelectorAll('[data-parallax]');
+      
+      parallaxElements.forEach((element) => {
+        const htmlElement = element as HTMLElement;
+        const speed = parseFloat(htmlElement.dataset.parallax || '0.5');
+        const yPos = -(scrolled * speed);
+        htmlElement.style.transform = `translateY(${yPos}px)`;
+      });
+      
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
     };
     
-    // Initial check
-    handleScroll();
-    
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);

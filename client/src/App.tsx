@@ -9,6 +9,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { Theme3DProvider } from "@/contexts/Theme3DContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import SmoothScroll from "@/components/SmoothScroll";
+import ScrollProgress from "@/components/ScrollProgress";
 import { useState, useEffect, useRef } from "react";
 
 // Calculate base URL for production or development environment
@@ -56,6 +57,7 @@ function App() {
       <Theme3DProvider>
         <AppProvider>
           <LoadingScreen />
+          <ScrollProgress />
           <SmoothScroll>
             <Router />
             {musicPlayerInstance}

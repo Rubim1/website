@@ -66,7 +66,8 @@ const AboutSection: React.FC = () => {
     <section id="about" className="relative py-20 overflow-hidden">
       {/* Background pattern with parallax */}
       <div
-        className="absolute inset-0 parallax-bg z-0 opacity-5"
+        className="absolute inset-0 parallax-bg z-0 opacity-5 parallax-slow"
+        data-parallax="0.3"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1522661067900-ab829854a57f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
         }}
